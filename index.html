@@ -110,9 +110,25 @@
         </div>
     </div>
 
+    <datalist id="connectorList"></datalist>
+
     <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded shadow-lg font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50">Copied to clipboard!</div>
 
     <script>
+        // --- DATA: Common Connectors ---
+        const COMMON_CONNECTORS = [
+            { name: "SharePoint", id: "/providers/Microsoft.PowerApps/apis/shared_sharepointonline" },
+            { name: "Dataverse (Common Data Service)", id: "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps" },
+            { name: "Office 365 Outlook", id: "/providers/Microsoft.PowerApps/apis/shared_office365" },
+            { name: "Office 365 Users", id: "/providers/Microsoft.PowerApps/apis/shared_office365users" },
+            { name: "Microsoft Teams", id: "/providers/Microsoft.PowerApps/apis/shared_teams" },
+            { name: "OneDrive for Business", id: "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness" },
+            { name: "Excel Online (Business)", id: "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness" },
+            { name: "SQL Server", id: "/providers/Microsoft.PowerApps/apis/shared_sql" },
+            { name: "Approvals", id: "/providers/Microsoft.PowerApps/apis/shared_approvals" },
+            { name: "Azure DevOps", id: "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices" }
+        ];
+
         // --- SECURITY: XSS Protection ---
         function escapeHtml(unsafe) {
             if (unsafe === null || unsafe === undefined) return '';
@@ -120,7 +136,7 @@
         }
 
         // --- THEME & STORAGE ---
-        const STORAGE_KEY = 'pp_deployment_settings_v2';
+        const STORAGE_KEY = 'pp_deployment_settings_v3'; // Bumped for connector list feature
         const THEME_KEY = 'theme';
 
         function initTheme() {
@@ -151,10 +167,7 @@
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
-                try { 
-                    const parsed = JSON.parse(saved);
-                    state = parsed; 
-                } catch(e) { console.error("Failed load", e); }
+                try { state = JSON.parse(saved); } catch(e) { console.error("Failed load", e); }
             }
         }
 
@@ -175,7 +188,15 @@
         function init() {
             initTheme();
             loadState();
+            renderDatalist(); // Build the quick fill list
             refreshAll();
+        }
+
+        function renderDatalist() {
+            const datalist = document.getElementById('connectorList');
+            datalist.innerHTML = COMMON_CONNECTORS.map(c => 
+                `<option value="${c.id}">${c.name}</option>`
+            ).join('');
         }
 
         function renderStages() {
@@ -198,7 +219,6 @@
             let headerHTML = `<tr><th class="px-4 py-3 min-w-[250px]">${keyLabel}</th>`;
             state.stages.forEach(stage => {
                 headerHTML += `<th class="px-4 py-3 min-w-[180px]">${escapeHtml(stage)}`;
-                // Show Sub-label ONLY for Connection References
                 if (type === 'conn') {
                     headerHTML += ` <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span>`;
                 }
@@ -211,15 +231,15 @@
             tbody.innerHTML = data.map(row => {
                 let rowHTML = `<tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors duration-150">`;
                 
-                // Column 1: Definition (Key + Optional Connector ID)
+                // Column 1: Definition
                 rowHTML += `<td class="px-4 py-3 space-y-2">                    
                     <input type="text" placeholder="${type === 'env' ? 'Schema Name' : 'Logical Name'}" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)" 
                         class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-medium">`;
                 
                 if(type === 'conn') {
-                    // Shared Connector ID input
-                    rowHTML += `<input type="text" placeholder="Connector ID (e.g. /providers/...)" value="${escapeHtml(row.connectorId || '')}" oninput="updateConnectorId(${row.id}, this.value)"
-                        class="w-full px-2 py-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-600 dark:text-zinc-400">`;
+                    // Shared Connector ID input with LIST attribute
+                    rowHTML += `<input type="text" list="connectorList" placeholder="Connector ID (Type to search...)" value="${escapeHtml(row.connectorId || '')}" oninput="updateConnectorId(${row.id}, this.value)"
+                        class="w-full px-2 py-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-600 dark:text-zinc-400" title="Select common connector or type custom ID">`;
                 }
                 rowHTML += `</td>`;
                 
@@ -234,7 +254,7 @@
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                         </td>`;
                     } else {
-                        // For Conn Refs, value is just the GUID now
+                        // For Conn Refs, value is just the GUID
                         rowHTML += `<td class="px-4 py-3 align-top">
                             <input type="text" placeholder="GUID" value="${escapeHtml(val)}" oninput="updateValue('conn', ${row.id}, '${safeStage}', this.value)"
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs">
@@ -296,7 +316,7 @@
 
         function addRow(type) {
             const newRow = { id: Date.now(), key: '', values: {} };
-            if(type === 'conn') newRow.connectorId = ''; // Initialize connectorId for new rows
+            if(type === 'conn') newRow.connectorId = ''; 
             
             const list = type === 'env' ? state.envVars : state.connRefs;
             list.push(newRow);
@@ -344,8 +364,8 @@
                 if(c.key) {
                     output.ConnectionReferences.push({
                         "LogicalName": c.key,
-                        "ConnectionId": c.values[realStage] || "", // Value is just GUID now
-                        "ConnectorId": c.connectorId || "" // Shared connector ID
+                        "ConnectionId": c.values[realStage] || "",
+                        "ConnectorId": c.connectorId || ""
                     });
                 }
             });
