@@ -4,504 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Power Platform Deployment Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#0078d4', // Microsoft Blue
+                            DEFAULT: '#0078d4',
+                            dark: '#2899f5', // Lighter blue for dark mode
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'system-ui', 'sans-serif'],
+                        mono: ['Consolas', 'Monaco', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* --- FLUENT THEME VARIABLES --- */
-        :root {
-            /* Light Theme */
-            --primary: #0078d4;
-            --primary-hover: #106ebe;
-            --bg: #f3f2f1;
-            --surface: #ffffff;
-            --text: #201f1e;
-            --sub-text: #605e5c;
-            --border: #edebe9;
-            --error: #a80000;
-            
-            --input-bg: #ffffff;
-            --input-border: #8a8886;
-            --input-border-hover: #323130;
-            --input-placeholder: #605e5c;
-
-            --header-bg: #faf9f8;
-            --pill-bg: #eff6fc;
-            --pill-text: #0078d4;
-            
-            --code-bg: #f3f2f1;
-            --code-text: #201f1e;
-
-            --shadow: 0 1.6px 3.6px 0 rgba(0,0,0,0.132), 0 0.3px 0.9px 0 rgba(0,0,0,0.108);
-            --focus-border: 2px solid #0078d4;
-        }
-
-        [data-theme="dark"] {
-            /* Dark Theme */
-            --primary: #2899f5;
-            --primary-hover: #72b9f8;
-            --bg: #201f1e;
-            --surface: #323130;
-            --text: #ffffff;
-            --sub-text: #c8c6c4;
-            --border: #484644;
-            --error: #f1707b;
-
-            --input-bg: #323130;
-            --input-border: #8a8886;
-            --input-border-hover: #f3f2f1;
-            --input-placeholder: #a19f9d;
-
-            --header-bg: #252423;
-            --pill-bg: #3b3a39;
-            --pill-text: #72b9f8;
-
-            --code-bg: #1b1a19;
-            --code-text: #d4d4d4;
-
-            --shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
-
-        /* --- GLOBAL STYLES --- */
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 24px;
-            box-sizing: border-box;
-            font-size: 14px;
-            line-height: 20px;
-            transition: background-color 0.2s, color 0.2s;
-        }
-
-        /* Header Area */
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap; /* Allow wrapping */
-            gap: 16px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        h1 { font-size: 20px; font-weight: 600; margin: 0; color: var(--text); }
-        h2 { font-size: 16px; font-weight: 600; margin: 0 0 16px 0; color: var(--text); }
-
-        /* --- COMPONENTS --- */
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .card {
-            background: var(--surface);
-            padding: 20px 24px;
-            border-radius: 2px;
-            box-shadow: var(--shadow);
-            border: 1px solid transparent;
-        }
-
-        /* Controls Area */
-        .controls {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            align-items: center;
-            justify-content: space-between; /* Space out items */
-            flex-wrap: wrap;
-        }
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        .stage-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .add-stage-wrapper {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* Input Styles */
-        input[type="text"], select {
-            height: 32px;
-            padding: 0 8px;
-            background-color: var(--input-bg);
-            color: var(--text);
-            border: 1px solid var(--input-border);
-            border-radius: 2px;
-            font-size: 14px;
-            font-family: inherit;
-            box-sizing: border-box;
-            width: 100%;
-            transition: all 0.1s;
-        }
-
-        input[type="text"]::placeholder { color: var(--input-placeholder); }
-        input[type="text"]:hover, select:hover { border-color: var(--input-border-hover); }
-        input[type="text"]:focus, select:focus {
-            outline: none;
-            border: var(--focus-border);
-            padding: 0 7px;
-        }
-
-        /* Responsive Input for New Stage */
-        #newStageInput {
-            width: 150px; /* Default width */
-        }
-
-        /* Connection Inputs Group */
-        .conn-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .conn-input-group input:nth-child(2) {
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 12px;
-            color: var(--sub-text);
-        }
-
-        /* Buttons */
-        button {
-            height: 32px;
-            padding: 0 16px;
-            background-color: var(--primary);
-            color: #ffffff;
-            border: 1px solid transparent;
-            border-radius: 2px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: background-color 0.1s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        [data-theme="dark"] button { color: #121212; }
-        [data-theme="dark"] button.secondary { color: var(--text); }
-        [data-theme="dark"] button.delete { color: #ff6b6b; }
-        [data-theme="dark"] button.icon-btn,
-        [data-theme="dark"] button.theme-toggle,
-        [data-theme="dark"] button.reset-btn { color: var(--text); }
-
-        button:hover { background-color: var(--primary-hover); }
-        
-        button.secondary { 
-            background-color: var(--surface); 
-            color: var(--text); 
-            border: 1px solid var(--input-border); 
-        }
-        button.secondary:hover { background-color: var(--bg); border-color: var(--input-border-hover); }
-
-        button.delete { 
-            background-color: transparent; 
-            color: #a4262c; 
-            padding: 4px; 
-            width: 32px; 
-            font-size: 18px; 
-            min-width: auto; 
-        }
-        button.delete:hover { background-color: rgba(164, 38, 44, 0.1); }
-
-        button.icon-btn {
-            background-color: transparent;
-            color: var(--text);
-            border: 1px solid transparent;
-            width: 32px;
-            padding: 0;
-            font-size: 16px;
-        }
-        button.icon-btn:hover {
-            background-color: var(--bg);
-            border-color: var(--input-border);
-            color: var(--primary);
-        }
-
-        button.theme-toggle, button.reset-btn {
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text);
-            font-weight: 400;
-        }
-        button.theme-toggle:hover, button.reset-btn:hover {
-            background-color: var(--surface);
-            color: var(--primary);
-        }
-
-        /* Tabs */
-        .tabs { 
-            display: flex; 
-            gap: 24px; 
-            margin-bottom: 20px; 
-            border-bottom: 1px solid var(--border); 
-            overflow-x: auto; /* Allow horizontal scroll for tabs */
-            white-space: nowrap;
-        }
-        .tab { 
-            padding: 0 4px 10px 4px; 
-            cursor: pointer; 
-            border-bottom: 2px solid transparent; 
-            font-weight: 400;
-            font-size: 14px;
-            color: var(--sub-text);
-            transition: all 0.2s;
-            margin-bottom: -1px;
-        }
-        .tab:hover { color: var(--text); }
-        .tab.active { 
-            border-bottom-color: var(--primary); 
-            color: var(--text); 
-            font-weight: 600;
-        }
-
-        /* Tables */
-        .table-wrapper { 
-            overflow-x: auto; 
-            margin-bottom: 20px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--input-border) transparent;
-            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
-        }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        
-        th, td { 
-            text-align: left; 
-            padding: 12px 8px; 
-            border-bottom: 1px solid var(--border); 
-            vertical-align: top; 
-        }
-        
-        th { 
-            font-weight: 600; 
-            font-size: 12px; 
-            color: var(--text); 
-            background-color: transparent;
-        }
-        
-        /* Preview & Toast */
-        .preview-header {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap; /* Wrap on small screens */
-            gap: 10px;
-        }
-        
-        .header-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        pre {
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 16px;
-            border-radius: 2px;
-            overflow: auto;
-            max-height: 400px;
-            margin: 0;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 13px;
-            border: 1px solid var(--border);
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .stage-pill {
-            background: var(--pill-bg);
-            color: var(--pill-text);
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            height: 24px;
-        }
-        .stage-pill span { cursor: pointer; margin-left: 8px; font-size: 14px; display: flex; align-items: center;}
-        .stage-pill span:hover { opacity: 0.7; }
-
-        /* Toast Notification */
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #323130;
-            color: #fff;
-            text-align: center;
-            border-radius: 2px;
-            padding: 12px;
-            position: fixed;
-            z-index: 1;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 14px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            opacity: 0;
-            transition: opacity 0.3s, bottom 0.3s;
-        }
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-            bottom: 50px;
-        }
-        [data-theme="dark"] #toast {
-            background-color: #f3f2f1;
-            color: #201f1e;
-        }
-
-        /* --- RESPONSIVE STYLES --- */
-        @media (max-width: 768px) {
-            body {
-                padding: 16px;
-            }
-            
-            .header-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .header-actions {
-                width: 100%;
-                justify-content: space-between;
-                margin-top: 8px;
-            }
-            
-            .controls {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .add-stage-wrapper {
-                width: 100%;
-            }
-            
-            #newStageInput {
-                flex: 1; /* Allow input to grow */
-                width: auto;
-            }
-            
-            .card {
-                padding: 16px;
-            }
-            
-            .preview-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .header-controls {
-                width: 100%;
-                margin-top: 8px;
-            }
-            
-            #stageSelect {
-                flex: 1;
-                width: auto;
-            }
-        }
-
+        /* Smooth transitions */
+        .transition-all-300 { transition: all 0.3s ease-in-out; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:text-zinc-100 min-h-screen transition-colors duration-300 font-sans p-4 md:p-8">
 
-    <div class="container">
-        <div class="header-row">
-            <h1>Power Platform Deployment Settings</h1>
-            <div class="header-actions">
-                <button class="reset-btn" onclick="resetData()" title="Clear all data and start over">
-                    🗑️ Reset
-                </button>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
-                </button>
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-fade-in-down">
+            <div>
+                <h1 class="text-2xl font-semibold tracking-tight">Power Platform Deployment Settings</h1>
+                <p class="text-slate-500 dark:text-zinc-400 text-sm mt-1">Generate your pipeline configuration JSON instantly.</p>
             </div>
-        </div>
-
-        <div class="card">
-            <h2>Configuration Matrix</h2>
             
-            <div class="controls">
-                <div class="stage-group">
-                    <span style="font-size: 14px; font-weight: 600; color: var(--text);">Stages:</span>
-                    <div id="stageList" style="display:flex; gap:8px; flex-wrap: wrap;"></div>
-                </div>
+            <div class="flex items-center gap-3">
+                <button onclick="resetData()" class="group flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200" title="Reset Data">
+                    <span class="group-hover:rotate-180 transition-transform duration-500">🗑️</span> Reset
+                </button>
                 
-                <div class="add-stage-wrapper">
-                    <input type="text" id="newStageInput" placeholder="New Stage Name">
-                    <button class="secondary" onclick="addStage()">Add</button>
+                <button onclick="toggleTheme()" class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all duration-300 transform hover:scale-105" title="Toggle Theme">
+                    <span id="themeIcon" class="text-lg">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-700 p-6 transition-all duration-300 hover:shadow-md">
+            
+            <h2 class="text-lg font-semibold border-b border-slate-100 dark:border-zinc-700 pb-4 mb-6">Configuration Matrix</h2>
+
+            <div class="flex flex-col md:flex-row gap-6 mb-8 items-start md:items-center justify-between">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-sm font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Stages:</span>
+                    <div id="stageList" class="flex flex-wrap gap-2 transition-all duration-300">
+                        </div>
+                </div>
+
+                <div class="flex w-full md:w-auto gap-2">
+                    <input type="text" id="newStageInput" placeholder="New Stage (e.g. UAT)" 
+                        class="flex-1 md:w-40 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200">
+                    <button onclick="addStage()" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700 active:transform active:scale-95 transition-all duration-200 shadow-sm">
+                        Add
+                    </button>
                 </div>
             </div>
 
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('env')" id="tab-env">Environment Variables</div>
-                <div class="tab" onclick="switchTab('conn')" id="tab-conn">Connection References</div>
-            </div>
-
-            <div id="section-env">
-                <div class="table-wrapper">
-                    <table id="envTable">
-                        <thead></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <button class="secondary" onclick="addRow('env')">
-                    <span style="margin-right: 6px; font-size: 16px;">+</span> Add Variable
+            <div class="flex gap-8 border-b border-slate-200 dark:border-zinc-700 mb-6">
+                <button onclick="switchTab('env')" id="tab-env" class="pb-3 text-sm font-medium border-b-2 border-primary text-primary transition-colors duration-200">
+                    Environment Variables
+                </button>
+                <button onclick="switchTab('conn')" id="tab-conn" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors duration-200">
+                    Connection References
                 </button>
             </div>
 
-            <div id="section-conn" style="display:none;">
-                <div class="table-wrapper">
-                    <table id="connTable">
-                        <thead></thead>
-                        <tbody></tbody>
+            <div id="section-env" class="animate-fade-in">
+                <div class="overflow-x-auto mb-4 border border-slate-200 dark:border-zinc-700 rounded-md">
+                    <table id="envTable" class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700">
+                            </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-zinc-700">
+                            </tbody>
                     </table>
                 </div>
-                <button class="secondary" onclick="addRow('conn')">
-                    <span style="margin-right: 6px; font-size: 16px;">+</span> Add Reference
+                <button onclick="addRow('env')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
+                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> 
+                    Add Variable
+                </button>
+            </div>
+
+            <div id="section-conn" class="hidden animate-fade-in">
+                <div class="overflow-x-auto mb-4 border border-slate-200 dark:border-zinc-700 rounded-md">
+                    <table id="connTable" class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700">
+                            </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-zinc-700">
+                            </tbody>
+                    </table>
+                </div>
+                <button onclick="addRow('conn')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
+                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> 
+                    Add Reference
                 </button>
             </div>
         </div>
 
-        <div class="card">
-            <div class="preview-header">
-                <span style="font-weight:600; font-size: 16px;">JSON Output</span>
-                <div class="header-controls">
-                    <select id="stageSelect" onchange="generateJSON()">
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-700 p-6 transition-all duration-300">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <h3 class="font-semibold text-lg">JSON Output</h3>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <select id="stageSelect" onchange="generateJSON()" class="flex-1 sm:w-48 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                     </select>
-                    <button class="icon-btn" onclick="copyToClipboard()" title="Copy to Clipboard">📋</button>
+                    <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard">
+                        📋
+                    </button>
                 </div>
             </div>
             
-            <pre id="jsonOutput">{}</pre>
+            <div class="relative group">
+                <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner custom-scrollbar transition-all duration-300">{}</pre>
+                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <span class="text-xs bg-black/50 text-white px-2 py-1 rounded backdrop-blur-sm">Read Only</span>
+                </div>
+            </div>
         </div>
+
     </div>
 
-    <div id="toast">Copied to clipboard!</div>
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded shadow-lg font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50">
+        Copied to clipboard!
+    </div>
 
     <script>
         // --- SECURITY: XSS Protection ---
-        // Escapes HTML special characters to prevent DOM XSS when using innerHTML
         function escapeHtml(unsafe) {
             if (unsafe === null || unsafe === undefined) return '';
             return String(unsafe)
@@ -528,24 +172,19 @@
         }
 
         function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem(THEME_KEY, theme);
-            
-            const icon = document.getElementById('themeIcon');
-            const text = document.getElementById('themeText');
-            
             if (theme === 'dark') {
-                icon.textContent = '☀️';
-                text.textContent = 'Light Mode';
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').textContent = '☀️';
             } else {
-                icon.textContent = '🌙';
-                text.textContent = 'Dark Mode';
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').textContent = '🌙';
             }
+            localStorage.setItem(THEME_KEY, theme);
         }
 
         function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme');
-            setTheme(current === 'dark' ? 'light' : 'dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            setTheme(isDark ? 'light' : 'dark');
         }
 
         // --- STATE MANAGEMENT ---
@@ -572,11 +211,7 @@
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
-                try {
-                    state = JSON.parse(saved);
-                } catch(e) {
-                    console.error("Failed to load saved state", e);
-                }
+                try { state = JSON.parse(saved); } catch(e) { console.error("Failed load", e); }
             }
         }
 
@@ -585,7 +220,7 @@
         }
 
         function resetData() {
-            if(confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+            if(confirm("Reset all data? This cannot be undone.")) {
                 state = JSON.parse(JSON.stringify(defaultState));
                 saveState();
                 refreshAll();
@@ -596,15 +231,17 @@
         // --- RENDER FUNCTIONS ---
         function init() {
             initTheme();
-            loadState(); // Load data from localStorage
+            loadState();
             refreshAll();
         }
 
         function renderStages() {
             const container = document.getElementById('stageList');
-            // Security: Use escapeHtml for stage names
             container.innerHTML = state.stages.map(s => 
-                `<span class="stage-pill">${escapeHtml(s)} <span onclick="removeStage('${escapeHtml(s)}')">&times;</span></span>`
+                `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 animate-fade-in">
+                    ${escapeHtml(s)} 
+                    <button onclick="removeStage('${escapeHtml(s)}')" class="ml-2 hover:text-blue-600 dark:hover:text-blue-200 focus:outline-none text-base leading-none">&times;</button>
+                </span>`
             ).join('');
         }
 
@@ -616,53 +253,51 @@
             const thead = document.querySelector(`#${tableId} thead`);
             const tbody = document.querySelector(`#${tableId} tbody`);
 
-            // 1. Build Header
-            let headerHTML = `<tr><th style="width:250px">${keyLabel}</th>`;
+            // Header
+            let headerHTML = `<tr><th class="px-4 py-3 min-w-[200px]">${keyLabel}</th>`;
             state.stages.forEach(stage => {
-                // Security: Escape stage names in header
-                headerHTML += `<th>${escapeHtml(stage)}</th>`;
+                headerHTML += `<th class="px-4 py-3 min-w-[150px]">${escapeHtml(stage)}</th>`;
             });
-            headerHTML += `<th style="width:40px"></th></tr>`;
+            headerHTML += `<th class="px-4 py-3 w-10"></th></tr>`;
             thead.innerHTML = headerHTML;
 
-            // 2. Build Body
+            // Body
             tbody.innerHTML = data.map(row => {
-                let rowHTML = `<tr>`;
+                let rowHTML = `<tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors duration-150">`;
                 
-                // Security: Escape keys/names
-                // Column 1: Key
-                rowHTML += `<td>                    
-                    <input type="text" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)">
+                // Key Input
+                rowHTML += `<td class="px-4 py-3">                    
+                    <input type="text" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)" 
+                    class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                 </td>`;
                 
-                // Column 2...N: Stage Values
+                // Stage Values
                 state.stages.forEach(stage => {
-                    const safeStage = escapeHtml(stage); // Ensure stage name is safe for strings
+                    const safeStage = escapeHtml(stage);
                     if (type === 'env') {
-                        // Environment Variable
-                        // Security: Escape input values
                         const val = row.values[stage] || '';
-                        rowHTML += `<td>
-                            <input type="text" placeholder="Value" value="${escapeHtml(val)}" oninput="updateEnvValue(${row.id}, '${safeStage}', this.value)">
+                        rowHTML += `<td class="px-4 py-3">
+                            <input type="text" placeholder="Value" value="${escapeHtml(val)}" oninput="updateEnvValue(${row.id}, '${safeStage}', this.value)"
+                            class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                         </td>`;
                     } else {
-                        // Connection Reference
                         const val = row.values[stage] || {};
                         const connId = val.connectionId || '';
                         const connectorId = val.connectorId || '';
                         
-                        // Security: Escape input values
-                        rowHTML += `<td>
-                            <div class="conn-input-group">
-                                <input type="text" placeholder="Connection ID (GUID)" value="${escapeHtml(connId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectionId', this.value)">
-                                <input type="text" placeholder="/providers/Microsoft.PowerApps/apis/shared_..." value="${escapeHtml(connectorId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectorId', this.value)">
-                            </div>
+                        rowHTML += `<td class="px-4 py-3 space-y-2">
+                            <input type="text" placeholder="Connection ID (GUID)" value="${escapeHtml(connId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectionId', this.value)"
+                            class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs">
+                            <input type="text" placeholder="/providers/..." value="${escapeHtml(connectorId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectorId', this.value)"
+                            class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-500">
                         </td>`;
                     }
                 });
 
                 // Delete Button
-                rowHTML += `<td><button class="delete" onclick="deleteRow('${type}', ${row.id})">&times;</button></td></tr>`;
+                rowHTML += `<td class="px-4 py-3 text-center">
+                    <button onclick="deleteRow('${type}', ${row.id})" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-lg leading-none" title="Delete Row">&times;</button>
+                </td></tr>`;
                 return rowHTML;
             }).join('');
         }
@@ -670,27 +305,32 @@
         function updateStageSelect() {
             const select = document.getElementById('stageSelect');
             const currentVal = select.value;
-            
-            // Security: Escape stage names in options
             let options = state.stages.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-            if(state.stages.length > 0) {
-                options += `<option value="ALL">ALL (Combined)</option>`;
-            }
-            
+            if(state.stages.length > 0) options += `<option value="ALL">ALL (Combined)</option>`;
             select.innerHTML = options;
-
-            if(state.stages.includes(currentVal) || currentVal === 'ALL') {
-                select.value = currentVal;
-            } else if(state.stages.length > 0) {
-                select.value = state.stages[0];
-            }
+            
+            if(state.stages.includes(currentVal) || currentVal === 'ALL') select.value = currentVal;
+            else if(state.stages.length > 0) select.value = state.stages[0];
         }
 
         // --- ACTIONS ---
         function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
+            // Reset Styles
+            const activeClass = ['border-primary', 'text-primary'];
+            const inactiveClass = ['border-transparent', 'text-slate-500', 'dark:text-zinc-400'];
             
+            document.getElementById('tab-env').classList.remove(...activeClass);
+            document.getElementById('tab-env').classList.add(...inactiveClass);
+            
+            document.getElementById('tab-conn').classList.remove(...activeClass);
+            document.getElementById('tab-conn').classList.add(...inactiveClass);
+
+            // Set Active
+            const activeTab = document.getElementById(`tab-${tab}`);
+            activeTab.classList.remove(...inactiveClass);
+            activeTab.classList.add(...activeClass);
+            
+            // Toggle Sections with simple animation
             document.getElementById('section-env').style.display = tab === 'env' ? 'block' : 'none';
             document.getElementById('section-conn').style.display = tab === 'conn' ? 'block' : 'none';
         }
@@ -698,7 +338,6 @@
         function addStage() {
             const input = document.getElementById('newStageInput');
             const val = input.value.trim();
-            // Sanitize check not strictly needed here since we sanitize on render, but good for logic
             if(val && !state.stages.includes(val)) {
                 state.stages.push(val);
                 input.value = '';
@@ -708,13 +347,8 @@
         }
 
         function removeStage(stageName) {
-            // Note: stageName comes from onclick, which is already sanitized in renderStages
-            // However, we need to be careful with unescaping if we were doing strict matching, 
-            // but here we filter the state array directly.
-            
-            // Decode html entities if necessary (simple approach for now matches state)
-            const stage = state.stages.find(s => s === stageName || escapeHtml(s) === stageName);
-            
+            // Note: In real app, unescape if needed for strict match
+            const stage = state.stages.find(s => escapeHtml(s) === stageName || s === stageName);
             if(stage && confirm(`Remove stage "${stage}"?`)) {
                 state.stages = state.stages.filter(s => s !== stage);
                 saveState();
@@ -745,20 +379,16 @@
         }
 
         function updateEnvValue(id, stage, val) {
-            // We need to match the stage name from the sanitized HTML back to the state
-            // In the render loop we passed: updateEnvValue(..., 'sanitizedStage', ...)
-            // We must find the real stage name in state that matches this sanitized one
-            const realStage = state.stages.find(s => escapeHtml(s) === stage);
-            
+            // De-escape stage name from HTML if needed, though simple find usually works for basic strings
+            const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
             const item = state.envVars.find(r => r.id === id);
-            if(item && realStage) { item.values[realStage] = val; saveState(); generateJSON(); }
+            if(item) { item.values[realStage] = val; saveState(); generateJSON(); }
         }
 
         function updateConnValue(id, stage, field, val) {
-            const realStage = state.stages.find(s => escapeHtml(s) === stage);
+            const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
             const item = state.connRefs.find(r => r.id === id);
-            
-            if(item && realStage) { 
+            if(item) { 
                 if(!item.values[realStage]) item.values[realStage] = { connectionId: '', connectorId: '' };
                 item.values[realStage][field] = val;
                 saveState();
@@ -774,24 +404,13 @@
             generateJSON();
         }
 
-        // --- GENERATOR LOGIC ---
+        // --- GENERATOR ---
         function buildPayload(stage) {
-            const output = {
-                "EnvironmentVariables": [],
-                "ConnectionReferences": []
-            };
-
-            // Stage is coming from the Select dropdown (which has escaped values or 'ALL')
-            // We need the raw state value for lookups
+            const output = { "EnvironmentVariables": [], "ConnectionReferences": [] };
             const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
 
             state.envVars.forEach(v => {
-                if(v.key) {
-                    output.EnvironmentVariables.push({
-                        "SchemaName": v.key,
-                        "Value": v.values[realStage] || ""
-                    });
-                }
+                if(v.key) output.EnvironmentVariables.push({ "SchemaName": v.key, "Value": v.values[realStage] || "" });
             });
 
             state.connRefs.forEach(c => {
@@ -809,28 +428,15 @@
 
         function buildAllPayload() {
             const allData = {};
-            state.stages.forEach(stage => {
-                allData[stage] = buildPayload(stage);
-            });
+            state.stages.forEach(stage => { allData[stage] = buildPayload(stage); });
             return allData;
         }
 
         function generateJSON() {
-            const stageSelect = document.getElementById('stageSelect');
-            const stage = stageSelect.value;
+            const stage = document.getElementById('stageSelect').value;
+            if(!stage) { document.getElementById('jsonOutput').textContent = "{}"; return; }
             
-            if(!stage) {
-                document.getElementById('jsonOutput').textContent = "{}";
-                return;
-            }
-
-            let output;
-            if (stage === 'ALL') {
-                output = buildAllPayload();
-            } else {
-                output = buildPayload(stage);
-            }
-            
+            let output = (stage === 'ALL') ? buildAllPayload() : buildPayload(stage);
             document.getElementById('jsonOutput').textContent = JSON.stringify(output, null, 2);
         }
 
@@ -840,13 +446,15 @@
         }
 
         function showToast(message) {
-            const x = document.getElementById("toast");
-            x.textContent = message;
-            x.className = "show";
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            }, 3000);
         }
 
-        // Start
+        // Init
         init();
     </script>
 </body>
