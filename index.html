@@ -78,11 +78,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap; /* Allow wrapping */
+            gap: 16px;
         }
 
         .header-actions {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         h1 { font-size: 20px; font-weight: 600; margin: 0; color: var(--text); }
@@ -113,7 +116,20 @@
             padding-bottom: 16px;
             border-bottom: 1px solid var(--border);
             align-items: center;
+            justify-content: space-between; /* Space out items */
             flex-wrap: wrap;
+        }
+        
+        .stage-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .add-stage-wrapper {
+            display: flex;
+            gap: 8px;
         }
 
         /* Input Styles */
@@ -132,13 +148,16 @@
         }
 
         input[type="text"]::placeholder { color: var(--input-placeholder); }
-        
         input[type="text"]:hover, select:hover { border-color: var(--input-border-hover); }
-        
         input[type="text"]:focus, select:focus {
             outline: none;
             border: var(--focus-border);
             padding: 0 7px;
+        }
+
+        /* Responsive Input for New Stage */
+        #newStageInput {
+            width: 150px; /* Default width */
         }
 
         /* Connection Inputs Group */
@@ -229,6 +248,8 @@
             gap: 24px; 
             margin-bottom: 20px; 
             border-bottom: 1px solid var(--border); 
+            overflow-x: auto; /* Allow horizontal scroll for tabs */
+            white-space: nowrap;
         }
         .tab { 
             padding: 0 4px 10px 4px; 
@@ -253,6 +274,7 @@
             margin-bottom: 20px;
             scrollbar-width: thin;
             scrollbar-color: var(--input-border) transparent;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
         }
         
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
@@ -279,6 +301,8 @@
             margin-bottom: 12px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap; /* Wrap on small screens */
+            gap: 10px;
         }
         
         .header-controls {
@@ -340,10 +364,61 @@
             opacity: 1;
             bottom: 50px;
         }
-        /* Toast in dark mode needs contrast */
         [data-theme="dark"] #toast {
             background-color: #f3f2f1;
             color: #201f1e;
+        }
+
+        /* --- RESPONSIVE STYLES --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            
+            .header-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 8px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .add-stage-wrapper {
+                width: 100%;
+            }
+            
+            #newStageInput {
+                flex: 1; /* Allow input to grow */
+                width: auto;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .preview-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-controls {
+                width: 100%;
+                margin-top: 8px;
+            }
+            
+            #stageSelect {
+                flex: 1;
+                width: auto;
+            }
         }
 
     </style>
@@ -367,10 +442,13 @@
             <h2>Configuration Matrix</h2>
             
             <div class="controls">
-                <span style="font-size: 14px; font-weight: 600; color: var(--text);">Stages:</span>
-                <div id="stageList" style="display:flex; gap:8px; flex-wrap: wrap;"></div>
-                <div style="display:flex; gap: 8px;">
-                    <input type="text" id="newStageInput" placeholder="New Stage Name" style="width: 150px;">
+                <div class="stage-group">
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text);">Stages:</span>
+                    <div id="stageList" style="display:flex; gap:8px; flex-wrap: wrap;"></div>
+                </div>
+                
+                <div class="add-stage-wrapper">
+                    <input type="text" id="newStageInput" placeholder="New Stage Name">
                     <button class="secondary" onclick="addStage()">Add</button>
                 </div>
             </div>
@@ -409,7 +487,7 @@
             <div class="preview-header">
                 <span style="font-weight:600; font-size: 16px;">JSON Output</span>
                 <div class="header-controls">
-                    <select id="stageSelect" onchange="generateJSON()" style="width: 160px;">
+                    <select id="stageSelect" onchange="generateJSON()">
                     </select>
                     <button class="icon-btn" onclick="copyToClipboard()" title="Copy to Clipboard">📋</button>
                 </div>
