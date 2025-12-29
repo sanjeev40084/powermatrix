@@ -138,6 +138,12 @@
         [data-theme="dark"] button.delete { color: #ff6b6b; }
         [data-theme="dark"] button.success { color: white; }
 
+        /* FIX: Ensure these buttons use light text in dark mode */
+        [data-theme="dark"] .theme-toggle,
+        [data-theme="dark"] .icon-btn {
+            color: var(--text);
+        }
+
         button:hover { opacity: 0.9; }
         button.secondary { background-color: var(--bg); color: var(--text); border: 1px solid var(--input-border); }
         button.delete { background-color: transparent; color: #a4262c; padding: 4px; font-size: 1.2rem; border: none; min-width: auto; }
