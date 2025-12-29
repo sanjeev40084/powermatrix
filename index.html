@@ -12,9 +12,9 @@
                 extend: {
                     colors: {
                         primary: {
-                            light: '#0078d4', // Microsoft Blue
+                            light: '#0078d4',
                             DEFAULT: '#0078d4',
-                            dark: '#2899f5', // Lighter blue for dark mode
+                            dark: '#2899f5',
                         }
                     },
                     fontFamily: {
@@ -26,14 +26,11 @@
         }
     </script>
     <style>
-        /* Custom Scrollbar for a cleaner look */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        /* Smooth transitions */
         .transition-all-300 { transition: all 0.3s ease-in-out; }
     </style>
 </head>
@@ -41,7 +38,7 @@
 
     <div class="max-w-6xl mx-auto space-y-6">
         
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-fade-in-down">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl font-semibold tracking-tight">Power Platform Deployment Settings</h1>
                 <p class="text-slate-500 dark:text-zinc-400 text-sm mt-1">Generate your pipeline configuration JSON instantly.</p>
@@ -51,69 +48,52 @@
                 <button onclick="resetData()" class="group flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200" title="Reset Data">
                     <span class="group-hover:rotate-180 transition-transform duration-500">🗑️</span> Reset
                 </button>
-                
                 <button onclick="toggleTheme()" class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all duration-300 transform hover:scale-105" title="Toggle Theme">
                     <span id="themeIcon" class="text-lg">🌙</span>
                 </button>
             </div>
         </header>
 
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-700 p-6 transition-all duration-300 hover:shadow-md">
-            
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-700 p-6 transition-all duration-300">
             <h2 class="text-lg font-semibold border-b border-slate-100 dark:border-zinc-700 pb-4 mb-6">Configuration Matrix</h2>
 
             <div class="flex flex-col md:flex-row gap-6 mb-8 items-start md:items-center justify-between">
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-sm font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Stages:</span>
-                    <div id="stageList" class="flex flex-wrap gap-2 transition-all duration-300">
-                        </div>
+                    <div id="stageList" class="flex flex-wrap gap-2 transition-all duration-300"></div>
                 </div>
-
                 <div class="flex w-full md:w-auto gap-2">
-                    <input type="text" id="newStageInput" placeholder="New Stage (e.g. UAT)" 
-                        class="flex-1 md:w-40 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200">
-                    <button onclick="addStage()" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700 active:transform active:scale-95 transition-all duration-200 shadow-sm">
-                        Add
-                    </button>
+                    <input type="text" id="newStageInput" placeholder="New Stage (e.g. UAT)" class="flex-1 md:w-40 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200">
+                    <button onclick="addStage()" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700 active:transform active:scale-95 transition-all duration-200 shadow-sm">Add</button>
                 </div>
             </div>
 
             <div class="flex gap-8 border-b border-slate-200 dark:border-zinc-700 mb-6">
-                <button onclick="switchTab('env')" id="tab-env" class="pb-3 text-sm font-medium border-b-2 border-primary text-primary transition-colors duration-200">
-                    Environment Variables
-                </button>
-                <button onclick="switchTab('conn')" id="tab-conn" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors duration-200">
-                    Connection References
-                </button>
+                <button onclick="switchTab('env')" id="tab-env" class="pb-3 text-sm font-medium border-b-2 border-primary text-primary transition-colors duration-200">Environment Variables</button>
+                <button onclick="switchTab('conn')" id="tab-conn" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors duration-200">Connection References</button>
             </div>
 
             <div id="section-env" class="animate-fade-in">
                 <div class="overflow-x-auto mb-4 border border-slate-200 dark:border-zinc-700 rounded-md">
                     <table id="envTable" class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700">
-                            </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-zinc-700">
-                            </tbody>
+                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700"></thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-zinc-700"></tbody>
                     </table>
                 </div>
                 <button onclick="addRow('env')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
-                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> 
-                    Add Variable
+                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Variable
                 </button>
             </div>
 
             <div id="section-conn" class="hidden animate-fade-in">
                 <div class="overflow-x-auto mb-4 border border-slate-200 dark:border-zinc-700 rounded-md">
                     <table id="connTable" class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700">
-                            </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-zinc-700">
-                            </tbody>
+                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700"></thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-zinc-700"></tbody>
                     </table>
                 </div>
                 <button onclick="addRow('conn')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
-                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> 
-                    Add Reference
+                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Reference
                 </button>
             </div>
         </div>
@@ -122,88 +102,49 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <h3 class="font-semibold text-lg">JSON Output</h3>
                 <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <select id="stageSelect" onchange="generateJSON()" class="flex-1 sm:w-48 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                    </select>
-                    <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard">
-                        📋
-                    </button>
+                    <select id="stageSelect" onchange="generateJSON()" class="flex-1 sm:w-48 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"></select>
+                    <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard">📋</button>
                 </div>
             </div>
-            
-            <div class="relative group">
-                <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner custom-scrollbar transition-all duration-300">{}</pre>
-                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <span class="text-xs bg-black/50 text-white px-2 py-1 rounded backdrop-blur-sm">Read Only</span>
-                </div>
-            </div>
+            <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner transition-all duration-300">{}</pre>
         </div>
-
     </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded shadow-lg font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50">
-        Copied to clipboard!
-    </div>
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded shadow-lg font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50">Copied to clipboard!</div>
 
     <script>
         // --- SECURITY: XSS Protection ---
         function escapeHtml(unsafe) {
             if (unsafe === null || unsafe === undefined) return '';
-            return String(unsafe)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // --- THEME & STORAGE MANAGEMENT ---
-        const STORAGE_KEY = 'pp_deployment_settings_data';
+        // --- THEME & STORAGE ---
+        const STORAGE_KEY = 'pp_deployment_settings_v2'; // Changed key due to structure change
         const THEME_KEY = 'theme';
 
         function initTheme() {
             const savedTheme = localStorage.getItem(THEME_KEY);
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                setTheme('dark');
-            } else {
-                setTheme('light');
-            }
+            setTheme(savedTheme === 'dark' || (!savedTheme && prefersDark) ? 'dark' : 'light');
         }
 
         function setTheme(theme) {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.getElementById('themeIcon').textContent = '☀️';
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('themeIcon').textContent = '🌙';
-            }
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            document.getElementById('themeIcon').textContent = theme === 'dark' ? '☀️' : '🌙';
             localStorage.setItem(THEME_KEY, theme);
         }
 
         function toggleTheme() {
-            const isDark = document.documentElement.classList.contains('dark');
-            setTheme(isDark ? 'light' : 'dark');
+            setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
         }
 
         // --- STATE MANAGEMENT ---
         const defaultState = {
             stages: ['QA', 'TST', 'PRD'],
-            envVars: [
-                { id: 1, key: 'cr56_sample_var', values: { 'QA': 'val_qa', 'TST': 'val_tst', 'PRD': 'val_prd' } }
-            ],
-            connRefs: [
-                { 
-                    id: 1, 
-                    key: 'cr56_shared_sharepoint', 
-                    values: { 
-                        'QA': { connectionId: '', connectorId: '' },
-                        'TST': { connectionId: '', connectorId: '' },
-                        'PRD': { connectionId: '', connectorId: '' }
-                    } 
-                }
-            ]
+            envVars: [{ id: 1, key: 'cr56_sample_var', values: { 'QA': 'val_qa', 'TST': 'val_tst', 'PRD': 'val_prd' } }],
+            // CHANGED STRUCTURE: connectorId is now at row level, values only hold connectionId GUIDs
+            connRefs: [{ id: 1, key: 'cr56_shared_sharepoint', connectorId: '', values: { 'QA': '', 'TST': '', 'PRD': '' } }]
         };
 
         let state = JSON.parse(JSON.stringify(defaultState));
@@ -211,7 +152,12 @@
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
-                try { state = JSON.parse(saved); } catch(e) { console.error("Failed load", e); }
+                try { 
+                    const parsed = JSON.parse(saved);
+                    // Simple migration check: if old structure detected (values array has objects), reset or migrate
+                    // For safety in this demo, we assume clean slate or valid data.
+                    state = parsed; 
+                } catch(e) { console.error("Failed load", e); }
             }
         }
 
@@ -236,11 +182,9 @@
         }
 
         function renderStages() {
-            const container = document.getElementById('stageList');
-            container.innerHTML = state.stages.map(s => 
+            document.getElementById('stageList').innerHTML = state.stages.map(s => 
                 `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 animate-fade-in">
-                    ${escapeHtml(s)} 
-                    <button onclick="removeStage('${escapeHtml(s)}')" class="ml-2 hover:text-blue-600 dark:hover:text-blue-200 focus:outline-none text-base leading-none">&times;</button>
+                    ${escapeHtml(s)} <button onclick="removeStage('${escapeHtml(s)}')" class="ml-2 hover:text-blue-600 dark:hover:text-blue-200 focus:outline-none text-base leading-none">&times;</button>
                 </span>`
             ).join('');
         }
@@ -248,16 +192,14 @@
         function renderTable(type) {
             const tableId = type === 'env' ? 'envTable' : 'connTable';
             const data = type === 'env' ? state.envVars : state.connRefs;
-            const keyLabel = type === 'env' ? 'Schema Name' : 'Logical Name';
+            const keyLabel = type === 'env' ? 'Schema Name' : 'Definition';
 
             const thead = document.querySelector(`#${tableId} thead`);
             const tbody = document.querySelector(`#${tableId} tbody`);
 
             // Header
-            let headerHTML = `<tr><th class="px-4 py-3 min-w-[200px]">${keyLabel}</th>`;
-            state.stages.forEach(stage => {
-                headerHTML += `<th class="px-4 py-3 min-w-[150px]">${escapeHtml(stage)}</th>`;
-            });
+            let headerHTML = `<tr><th class="px-4 py-3 min-w-[250px]">${keyLabel}</th>`;
+            state.stages.forEach(stage => headerHTML += `<th class="px-4 py-3 min-w-[180px]">${escapeHtml(stage)} <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span></th>`);
             headerHTML += `<th class="px-4 py-3 w-10"></th></tr>`;
             thead.innerHTML = headerHTML;
 
@@ -265,38 +207,39 @@
             tbody.innerHTML = data.map(row => {
                 let rowHTML = `<tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors duration-150">`;
                 
-                // Key Input
-                rowHTML += `<td class="px-4 py-3">                    
-                    <input type="text" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)" 
-                    class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-                </td>`;
+                // Column 1: Definition (Key + Optional Connector ID)
+                rowHTML += `<td class="px-4 py-3 space-y-2">                    
+                    <input type="text" placeholder="${type === 'env' ? 'Schema Name' : 'Logical Name'}" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)" 
+                        class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-medium">`;
+                
+                if(type === 'conn') {
+                    // Shared Connector ID input
+                    rowHTML += `<input type="text" placeholder="Connector ID (e.g. /providers/...)" value="${escapeHtml(row.connectorId || '')}" oninput="updateConnectorId(${row.id}, this.value)"
+                        class="w-full px-2 py-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-600 dark:text-zinc-400">`;
+                }
+                rowHTML += `</td>`;
                 
                 // Stage Values
                 state.stages.forEach(stage => {
                     const safeStage = escapeHtml(stage);
+                    const val = row.values[stage] || '';
+                    
                     if (type === 'env') {
-                        const val = row.values[stage] || '';
-                        rowHTML += `<td class="px-4 py-3">
-                            <input type="text" placeholder="Value" value="${escapeHtml(val)}" oninput="updateEnvValue(${row.id}, '${safeStage}', this.value)"
+                        rowHTML += `<td class="px-4 py-3 align-top">
+                            <input type="text" placeholder="Value" value="${escapeHtml(val)}" oninput="updateValue('env', ${row.id}, '${safeStage}', this.value)"
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                         </td>`;
                     } else {
-                        const val = row.values[stage] || {};
-                        const connId = val.connectionId || '';
-                        const connectorId = val.connectorId || '';
-                        
-                        rowHTML += `<td class="px-4 py-3 space-y-2">
-                            <input type="text" placeholder="Connection ID (GUID)" value="${escapeHtml(connId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectionId', this.value)"
+                        // For Conn Refs, value is just the GUID now
+                        rowHTML += `<td class="px-4 py-3 align-top">
+                            <input type="text" placeholder="GUID" value="${escapeHtml(val)}" oninput="updateValue('conn', ${row.id}, '${safeStage}', this.value)"
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs">
-                            <input type="text" placeholder="/providers/..." value="${escapeHtml(connectorId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectorId', this.value)"
-                            class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-500">
                         </td>`;
                     }
                 });
 
-                // Delete Button
-                rowHTML += `<td class="px-4 py-3 text-center">
-                    <button onclick="deleteRow('${type}', ${row.id})" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-lg leading-none" title="Delete Row">&times;</button>
+                rowHTML += `<td class="px-4 py-3 text-center align-top pt-4">
+                    <button onclick="deleteRow('${type}', ${row.id})" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-lg leading-none">&times;</button>
                 </td></tr>`;
                 return rowHTML;
             }).join('');
@@ -308,31 +251,25 @@
             let options = state.stages.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
             if(state.stages.length > 0) options += `<option value="ALL">ALL (Combined)</option>`;
             select.innerHTML = options;
-            
             if(state.stages.includes(currentVal) || currentVal === 'ALL') select.value = currentVal;
             else if(state.stages.length > 0) select.value = state.stages[0];
         }
 
         // --- ACTIONS ---
         function switchTab(tab) {
-            // Reset Styles
             const activeClass = ['border-primary', 'text-primary'];
             const inactiveClass = ['border-transparent', 'text-slate-500', 'dark:text-zinc-400'];
-            
-            document.getElementById('tab-env').classList.remove(...activeClass);
-            document.getElementById('tab-env').classList.add(...inactiveClass);
-            
-            document.getElementById('tab-conn').classList.remove(...activeClass);
-            document.getElementById('tab-conn').classList.add(...inactiveClass);
-
-            // Set Active
-            const activeTab = document.getElementById(`tab-${tab}`);
-            activeTab.classList.remove(...inactiveClass);
-            activeTab.classList.add(...activeClass);
-            
-            // Toggle Sections with simple animation
-            document.getElementById('section-env').style.display = tab === 'env' ? 'block' : 'none';
-            document.getElementById('section-conn').style.display = tab === 'conn' ? 'block' : 'none';
+            ['env', 'conn'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const section = document.getElementById(`section-${t}`);
+                if(t === tab) {
+                    el.classList.remove(...inactiveClass); el.classList.add(...activeClass);
+                    section.classList.remove('hidden');
+                } else {
+                    el.classList.remove(...activeClass); el.classList.add(...inactiveClass);
+                    section.classList.add('hidden');
+                }
+            });
         }
 
         function addStage() {
@@ -341,67 +278,53 @@
             if(val && !state.stages.includes(val)) {
                 state.stages.push(val);
                 input.value = '';
-                saveState();
-                refreshAll();
+                saveState(); refreshAll();
             }
         }
 
         function removeStage(stageName) {
-            // Note: In real app, unescape if needed for strict match
             const stage = state.stages.find(s => escapeHtml(s) === stageName || s === stageName);
             if(stage && confirm(`Remove stage "${stage}"?`)) {
                 state.stages = state.stages.filter(s => s !== stage);
-                saveState();
-                refreshAll();
+                saveState(); refreshAll();
             }
         }
 
         function addRow(type) {
             const newRow = { id: Date.now(), key: '', values: {} };
-            if(type === 'env') state.envVars.push(newRow);
-            else state.connRefs.push(newRow);
-            saveState();
-            renderTable(type);
+            if(type === 'conn') newRow.connectorId = ''; // Initialize connectorId for new rows
+            
+            const list = type === 'env' ? state.envVars : state.connRefs;
+            list.push(newRow);
+            saveState(); renderTable(type);
         }
 
         function deleteRow(type, id) {
             if(type === 'env') state.envVars = state.envVars.filter(r => r.id !== id);
             else state.connRefs = state.connRefs.filter(r => r.id !== id);
-            saveState();
-            renderTable(type);
-            generateJSON();
+            saveState(); renderTable(type); generateJSON();
         }
 
         function updateKey(type, id, val) {
-            const data = type === 'env' ? state.envVars : state.connRefs;
-            const item = data.find(r => r.id === id);
+            const list = type === 'env' ? state.envVars : state.connRefs;
+            const item = list.find(r => r.id === id);
             if(item) { item.key = val; saveState(); generateJSON(); }
         }
 
-        function updateEnvValue(id, stage, val) {
-            // De-escape stage name from HTML if needed, though simple find usually works for basic strings
+        function updateConnectorId(id, val) {
+            const item = state.connRefs.find(r => r.id === id);
+            if(item) { item.connectorId = val; saveState(); generateJSON(); }
+        }
+
+        function updateValue(type, id, stage, val) {
             const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
-            const item = state.envVars.find(r => r.id === id);
+            const list = type === 'env' ? state.envVars : state.connRefs;
+            const item = list.find(r => r.id === id);
             if(item) { item.values[realStage] = val; saveState(); generateJSON(); }
         }
 
-        function updateConnValue(id, stage, field, val) {
-            const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
-            const item = state.connRefs.find(r => r.id === id);
-            if(item) { 
-                if(!item.values[realStage]) item.values[realStage] = { connectionId: '', connectorId: '' };
-                item.values[realStage][field] = val;
-                saveState();
-                generateJSON(); 
-            }
-        }
-
         function refreshAll() {
-            renderStages();
-            renderTable('env');
-            renderTable('conn');
-            updateStageSelect();
-            generateJSON();
+            renderStages(); renderTable('env'); renderTable('conn'); updateStageSelect(); generateJSON();
         }
 
         // --- GENERATOR ---
@@ -415,11 +338,10 @@
 
             state.connRefs.forEach(c => {
                 if(c.key) {
-                    const valObj = c.values[realStage] || {};
                     output.ConnectionReferences.push({
                         "LogicalName": c.key,
-                        "ConnectionId": valObj.connectionId || "",
-                        "ConnectorId": valObj.connectorId || ""
+                        "ConnectionId": c.values[realStage] || "", // Value is just GUID now
+                        "ConnectorId": c.connectorId || "" // Shared connector ID
                     });
                 }
             });
@@ -435,26 +357,19 @@
         function generateJSON() {
             const stage = document.getElementById('stageSelect').value;
             if(!stage) { document.getElementById('jsonOutput').textContent = "{}"; return; }
-            
             let output = (stage === 'ALL') ? buildAllPayload() : buildPayload(stage);
             document.getElementById('jsonOutput').textContent = JSON.stringify(output, null, 2);
         }
 
         function copyToClipboard() {
             const text = document.getElementById('jsonOutput').textContent;
-            navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!"));
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast");
+                toast.classList.remove('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.classList.add('opacity-0', 'translate-y-4'), 2000);
+            });
         }
 
-        function showToast(message) {
-            const toast = document.getElementById("toast");
-            toast.textContent = message;
-            toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-            }, 3000);
-        }
-
-        // Init
         init();
     </script>
 </body>
