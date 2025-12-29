@@ -500,6 +500,18 @@
     <div id="toast">Copied to clipboard!</div>
 
     <script>
+        // --- SECURITY: XSS Protection ---
+        // Escapes HTML special characters to prevent DOM XSS when using innerHTML
+        function escapeHtml(unsafe) {
+            if (unsafe === null || unsafe === undefined) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // --- THEME & STORAGE MANAGEMENT ---
         const STORAGE_KEY = 'pp_deployment_settings_data';
         const THEME_KEY = 'theme';
@@ -590,8 +602,9 @@
 
         function renderStages() {
             const container = document.getElementById('stageList');
+            // Security: Use escapeHtml for stage names
             container.innerHTML = state.stages.map(s => 
-                `<span class="stage-pill">${s} <span onclick="removeStage('${s}')">&times;</span></span>`
+                `<span class="stage-pill">${escapeHtml(s)} <span onclick="removeStage('${escapeHtml(s)}')">&times;</span></span>`
             ).join('');
         }
 
@@ -606,7 +619,8 @@
             // 1. Build Header
             let headerHTML = `<tr><th style="width:250px">${keyLabel}</th>`;
             state.stages.forEach(stage => {
-                headerHTML += `<th>${stage}</th>`;
+                // Security: Escape stage names in header
+                headerHTML += `<th>${escapeHtml(stage)}</th>`;
             });
             headerHTML += `<th style="width:40px"></th></tr>`;
             thead.innerHTML = headerHTML;
@@ -615,18 +629,21 @@
             tbody.innerHTML = data.map(row => {
                 let rowHTML = `<tr>`;
                 
+                // Security: Escape keys/names
                 // Column 1: Key
                 rowHTML += `<td>                    
-                    <input type="text" value="${row.key}" oninput="updateKey('${type}', ${row.id}, this.value)">
+                    <input type="text" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)">
                 </td>`;
                 
                 // Column 2...N: Stage Values
                 state.stages.forEach(stage => {
+                    const safeStage = escapeHtml(stage); // Ensure stage name is safe for strings
                     if (type === 'env') {
                         // Environment Variable
+                        // Security: Escape input values
                         const val = row.values[stage] || '';
                         rowHTML += `<td>
-                            <input type="text" placeholder="Value" value="${val}" oninput="updateEnvValue(${row.id}, '${stage}', this.value)">
+                            <input type="text" placeholder="Value" value="${escapeHtml(val)}" oninput="updateEnvValue(${row.id}, '${safeStage}', this.value)">
                         </td>`;
                     } else {
                         // Connection Reference
@@ -634,10 +651,11 @@
                         const connId = val.connectionId || '';
                         const connectorId = val.connectorId || '';
                         
+                        // Security: Escape input values
                         rowHTML += `<td>
                             <div class="conn-input-group">
-                                <input type="text" placeholder="Connection ID (GUID)" value="${connId}" oninput="updateConnValue(${row.id}, '${stage}', 'connectionId', this.value)">
-                                <input type="text" placeholder="/providers/Microsoft.PowerApps/apis/shared_..." value="${connectorId}" oninput="updateConnValue(${row.id}, '${stage}', 'connectorId', this.value)">
+                                <input type="text" placeholder="Connection ID (GUID)" value="${escapeHtml(connId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectionId', this.value)">
+                                <input type="text" placeholder="/providers/Microsoft.PowerApps/apis/shared_..." value="${escapeHtml(connectorId)}" oninput="updateConnValue(${row.id}, '${safeStage}', 'connectorId', this.value)">
                             </div>
                         </td>`;
                     }
@@ -653,7 +671,8 @@
             const select = document.getElementById('stageSelect');
             const currentVal = select.value;
             
-            let options = state.stages.map(s => `<option value="${s}">${s}</option>`).join('');
+            // Security: Escape stage names in options
+            let options = state.stages.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
             if(state.stages.length > 0) {
                 options += `<option value="ALL">ALL (Combined)</option>`;
             }
@@ -679,6 +698,7 @@
         function addStage() {
             const input = document.getElementById('newStageInput');
             const val = input.value.trim();
+            // Sanitize check not strictly needed here since we sanitize on render, but good for logic
             if(val && !state.stages.includes(val)) {
                 state.stages.push(val);
                 input.value = '';
@@ -688,8 +708,15 @@
         }
 
         function removeStage(stageName) {
-            if(confirm(`Remove stage "${stageName}"?`)) {
-                state.stages = state.stages.filter(s => s !== stageName);
+            // Note: stageName comes from onclick, which is already sanitized in renderStages
+            // However, we need to be careful with unescaping if we were doing strict matching, 
+            // but here we filter the state array directly.
+            
+            // Decode html entities if necessary (simple approach for now matches state)
+            const stage = state.stages.find(s => s === stageName || escapeHtml(s) === stageName);
+            
+            if(stage && confirm(`Remove stage "${stage}"?`)) {
+                state.stages = state.stages.filter(s => s !== stage);
                 saveState();
                 refreshAll();
             }
@@ -718,15 +745,22 @@
         }
 
         function updateEnvValue(id, stage, val) {
+            // We need to match the stage name from the sanitized HTML back to the state
+            // In the render loop we passed: updateEnvValue(..., 'sanitizedStage', ...)
+            // We must find the real stage name in state that matches this sanitized one
+            const realStage = state.stages.find(s => escapeHtml(s) === stage);
+            
             const item = state.envVars.find(r => r.id === id);
-            if(item) { item.values[stage] = val; saveState(); generateJSON(); }
+            if(item && realStage) { item.values[realStage] = val; saveState(); generateJSON(); }
         }
 
         function updateConnValue(id, stage, field, val) {
+            const realStage = state.stages.find(s => escapeHtml(s) === stage);
             const item = state.connRefs.find(r => r.id === id);
-            if(item) { 
-                if(!item.values[stage]) item.values[stage] = { connectionId: '', connectorId: '' };
-                item.values[stage][field] = val;
+            
+            if(item && realStage) { 
+                if(!item.values[realStage]) item.values[realStage] = { connectionId: '', connectorId: '' };
+                item.values[realStage][field] = val;
                 saveState();
                 generateJSON(); 
             }
@@ -747,18 +781,22 @@
                 "ConnectionReferences": []
             };
 
+            // Stage is coming from the Select dropdown (which has escaped values or 'ALL')
+            // We need the raw state value for lookups
+            const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
+
             state.envVars.forEach(v => {
                 if(v.key) {
                     output.EnvironmentVariables.push({
                         "SchemaName": v.key,
-                        "Value": v.values[stage] || ""
+                        "Value": v.values[realStage] || ""
                     });
                 }
             });
 
             state.connRefs.forEach(c => {
                 if(c.key) {
-                    const valObj = c.values[stage] || {};
+                    const valObj = c.values[realStage] || {};
                     output.ConnectionReferences.push({
                         "LogicalName": c.key,
                         "ConnectionId": valObj.connectionId || "",
@@ -778,7 +816,9 @@
         }
 
         function generateJSON() {
-            const stage = document.getElementById('stageSelect').value;
+            const stageSelect = document.getElementById('stageSelect');
+            const stage = stageSelect.value;
+            
             if(!stage) {
                 document.getElementById('jsonOutput').textContent = "{}";
                 return;
