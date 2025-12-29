@@ -120,7 +120,7 @@
         }
 
         // --- THEME & STORAGE ---
-        const STORAGE_KEY = 'pp_deployment_settings_v2'; // Changed key due to structure change
+        const STORAGE_KEY = 'pp_deployment_settings_v2';
         const THEME_KEY = 'theme';
 
         function initTheme() {
@@ -143,7 +143,6 @@
         const defaultState = {
             stages: ['QA', 'TST', 'PRD'],
             envVars: [{ id: 1, key: 'cr56_sample_var', values: { 'QA': 'val_qa', 'TST': 'val_tst', 'PRD': 'val_prd' } }],
-            // CHANGED STRUCTURE: connectorId is now at row level, values only hold connectionId GUIDs
             connRefs: [{ id: 1, key: 'cr56_shared_sharepoint', connectorId: '', values: { 'QA': '', 'TST': '', 'PRD': '' } }]
         };
 
@@ -154,8 +153,6 @@
             if (saved) {
                 try { 
                     const parsed = JSON.parse(saved);
-                    // Simple migration check: if old structure detected (values array has objects), reset or migrate
-                    // For safety in this demo, we assume clean slate or valid data.
                     state = parsed; 
                 } catch(e) { console.error("Failed load", e); }
             }
@@ -199,7 +196,14 @@
 
             // Header
             let headerHTML = `<tr><th class="px-4 py-3 min-w-[250px]">${keyLabel}</th>`;
-            state.stages.forEach(stage => headerHTML += `<th class="px-4 py-3 min-w-[180px]">${escapeHtml(stage)} <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span></th>`);
+            state.stages.forEach(stage => {
+                headerHTML += `<th class="px-4 py-3 min-w-[180px]">${escapeHtml(stage)}`;
+                // Show Sub-label ONLY for Connection References
+                if (type === 'conn') {
+                    headerHTML += ` <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span>`;
+                }
+                headerHTML += `</th>`;
+            });
             headerHTML += `<th class="px-4 py-3 w-10"></th></tr>`;
             thead.innerHTML = headerHTML;
 
