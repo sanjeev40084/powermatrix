@@ -2,7 +2,7 @@
 
 A lightweight, browser-based tool to generate `deployment-settings.json` files for Microsoft Power Platform pipelines. 
 
-**[🔗 Live Demo](https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/)**
+**[🔗 Live Demo](https://sanjeev40084.github.io/powermatrix/)**
 
 ## 🎯 The Problem
 When deploying Power Platform solutions via pipelines (Azure DevOps or GitHub Actions), managing Environment Variables and Connection References across multiple environments (QA, UAT, Prod) often requires manually editing error-prone JSON files.
