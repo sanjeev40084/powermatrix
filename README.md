@@ -21,7 +21,7 @@ This tool provides a visual **Configuration Matrix** that allows you to:
 * **Privacy First:** Runs entirely in your browser. No data is sent to any server.
 
 ## 🛠️ How to Use
-1.  **Open the Tool:** Click the [Live Demo link](https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/) above.
+1.  **Open the Tool:** Click the [Live Demo link](https://sanjeev40084.github.io/powermatrix/) above.
 2.  **Define Stages:** Add your environments (e.g., `QA`, `UAT`, `PRD`) in the top control bar.
 3.  **Add Variables:**
     * **Environment Variables:** Enter the *Schema Name* and the value for each stage.
