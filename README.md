@@ -1,44 +1,53 @@
 # Power Platform Deployment Settings Generator
 
-A lightweight, browser-based tool to generate `deployment-settings.json` files for Microsoft Power Platform pipelines. 
+A modern, secure, and responsive tool to generate `deployment-settings.json` files for Microsoft Power Platform pipelines. Built with **Tailwind CSS** and **Vanilla JS**.
 
 **[🔗 Live Demo](https://sanjeev40084.github.io/powermatrix/)**
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Web-orange.svg)
+
 ## 🎯 The Problem
-When deploying Power Platform solutions via pipelines (Azure DevOps or GitHub Actions), managing Environment Variables and Connection References across multiple environments (QA, UAT, Prod) often requires manually editing error-prone JSON files.
+Managing ALM for Power Platform often requires manually editing complex JSON files to map Environment Variables and Connection References across different environments (QA, UAT, Prod). This process is prone to syntax errors and GUID mismatches.
 
 ## 🚀 The Solution
-This tool provides a visual **Configuration Matrix** that allows you to:
-1. Define your deployment stages (e.g., Dev, Test, Prod).
-2. Input Environment Variables and Connection References in a grid view.
-3. Automatically generate the correct JSON structure required by the Power Platform Build Tools.
+**PowerMatrix** provides a clean, visual grid interface that handles the JSON structure for you. 
 
-## ✨ Features
-* **Visual Matrix:** See all your environment values side-by-side.
-* **JSON Preview:** Real-time preview of the generated code.
-* **Bulk Export:** Download a combined JSON file for all stages at once.
-* **Dark Mode:** toggle between light and dark themes.
-* **Privacy First:** Runs entirely in your browser. No data is sent to any server.
+### Key Features
+* **✨ Smart "Quick Fill":** Auto-suggests IDs for common connectors (SharePoint, Dataverse, Outlook, etc.) so you don't have to look them up.
+* **🔒 Secure & Private:** Runs 100% in your browser. No data is ever sent to a server.
+* **💾 Auto-Save:** Your work is saved to your browser's Local Storage instantly. Close the tab and come back later without losing data.
+* **🌗 Dark Mode:** Fully supported dark theme that respects system preferences.
+* **📱 Responsive Design:** Works on desktop, tablets, and mobile devices.
+* **⚡ High Performance:** Uses debouncing and sticky headers for managing large configuration matrices smoothly.
 
 ## 🛠️ How to Use
-1.  **Open the Tool:** Click the [Live Demo link](https://sanjeev40084.github.io/powermatrix/) above.
-2.  **Define Stages:** Add your environments (e.g., `QA`, `UAT`, `PRD`) in the top control bar.
-3.  **Add Variables:**
-    * **Environment Variables:** Enter the *Schema Name* and the value for each stage.
-    * **Connection References:** Enter the *Logical Name*, the Connection ID (GUID), and the Connector ID path.
-4.  **Export:** * Use the dropdown to view JSON for a specific stage.
-    * Click the **Copy** icon to paste it into your pipeline.
-    * Select **ALL (Combined)** to download a full backup of your configuration.
 
-## 📦 Installation / Local Use
-Since this is a static HTML application, you don't need to install anything.
+1.  **Define Stages:** Add your deployment stages (e.g., `QA`, `UAT`, `PRD`) at the top. The tool automatically handles capitalization.
+2.  **Environment Variables:** * Enter the *Schema Name* (e.g., `cr56_site_url`).
+    * Enter the specific value for each environment.
+3.  **Connection References:**
+    * **Logical Name:** Enter the reference name from your solution (e.g., `cr56_shared_sharepoint`).
+    * **Connector ID:** Select a standard connector from the dropdown list or paste a custom path. *This applies to all environments.*
+    * **Connection ID (GUID):** Enter the specific Connection GUID for each environment.
+4.  **Export:** * Select a specific stage to generate the JSON for that pipeline run.
+    * Select **ALL (Combined)** to backup your full configuration.
+    * Click **Copy** to paste directly into Azure DevOps or GitHub Actions.
 
-1.  Clone this repository.
+## 📦 Local Installation
+Since this is a static HTML application, no build process is required.
+
+1.  Clone the repository:
+    ```bash
+    git clone [https://github.com/sanjeev40084/powermatrix.git](https://github.com/sanjeev40084/powermatrix.git)
+    ```
 2.  Open `index.html` in any web browser.
 
-## 🤝 Contributing
-Contributions are welcome! If you have suggestions for improvements, feel free to open an issue or submit a pull request.
+## 🛡️ Security Note
+This tool uses `textContent` binding and explicitly sanitizes all user inputs to prevent XSS (Cross-Site Scripting). It utilizes Tailwind CSS via CDN for styling.
 
+## 🤝 Contributing
+Contributions are welcome!
 1.  Fork the Project
 2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
