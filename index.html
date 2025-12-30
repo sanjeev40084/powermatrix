@@ -20,6 +20,15 @@
                     fontFamily: {
                         sans: ['Segoe UI', 'system-ui', 'sans-serif'],
                         mono: ['Consolas', 'Monaco', 'monospace'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(5px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
                     }
                 }
             }
@@ -32,6 +41,12 @@
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .transition-all-300 { transition: all 0.3s ease-in-out; }
+        
+        /* Fix for sticky header border collapse issues */
+        th { position: sticky; top: 0; z-index: 10; }
+        /* Ensure background covers scrolling content */
+        .light-header-bg { background-color: #f8fafc; } /* slate-50 */
+        .dark-header-bg { background-color: #18181b; } /* zinc-900 */
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:text-zinc-100 min-h-screen transition-colors duration-300 font-sans p-4 md:p-8">
@@ -74,9 +89,9 @@
             </div>
 
             <div id="section-env" class="animate-fade-in">
-                <div class="overflow-x-auto mb-4 border border-slate-200 dark:border-zinc-700 rounded-md">
-                    <table id="envTable" class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700"></thead>
+                <div class="overflow-x-auto max-h-[60vh] mb-4 border border-slate-200 dark:border-zinc-700 rounded-md relative">
+                    <table id="envTable" class="w-full text-sm text-left border-separate border-spacing-0">
+                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold"></thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-zinc-700"></tbody>
                     </table>
                 </div>
@@ -86,9 +101,9 @@
             </div>
 
             <div id="section-conn" class="hidden animate-fade-in">
-                <div class="overflow-x-auto mb-4 border border-slate-200 dark:border-zinc-700 rounded-md">
-                    <table id="connTable" class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700"></thead>
+                <div class="overflow-x-auto max-h-[60vh] mb-4 border border-slate-200 dark:border-zinc-700 rounded-md relative">
+                    <table id="connTable" class="w-full text-sm text-left border-separate border-spacing-0">
+                        <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold"></thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-zinc-700"></tbody>
                     </table>
                 </div>
@@ -118,7 +133,7 @@
         // --- DATA: Common Connectors ---
         const COMMON_CONNECTORS = [
             { name: "SharePoint", id: "/providers/Microsoft.PowerApps/apis/shared_sharepointonline" },
-            { name: "Dataverse (Common Data Service)", id: "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps" },
+            { name: "Dataverse", id: "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps" },
             { name: "Office 365 Outlook", id: "/providers/Microsoft.PowerApps/apis/shared_office365" },
             { name: "Office 365 Users", id: "/providers/Microsoft.PowerApps/apis/shared_office365users" },
             { name: "Microsoft Teams", id: "/providers/Microsoft.PowerApps/apis/shared_teams" },
@@ -129,7 +144,18 @@
             { name: "Azure DevOps", id: "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices" }
         ];
 
-        // --- SECURITY: XSS Protection ---
+        // --- UTILS: Debounce & Security ---
+        // Prevents lag by delaying execution until user stops typing
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        // XSS Protection
         function escapeHtml(unsafe) {
             if (unsafe === null || unsafe === undefined) return '';
             return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -149,6 +175,8 @@
             document.documentElement.classList.toggle('dark', theme === 'dark');
             document.getElementById('themeIcon').textContent = theme === 'dark' ? '☀️' : '🌙';
             localStorage.setItem(THEME_KEY, theme);
+            // Refresh table to update header backgrounds
+            if (document.getElementById('envTable').rows.length > 0) refreshAll();
         }
 
         function toggleTheme() {
@@ -163,6 +191,12 @@
         };
 
         let state = JSON.parse(JSON.stringify(defaultState));
+
+        // Create debounced version of save & generate
+        const debouncedSaveAndGenerate = debounce(() => {
+            saveState();
+            generateJSON();
+        }, 300);
 
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -194,9 +228,7 @@
 
         function renderDatalist() {
             const datalist = document.getElementById('connectorList');
-            datalist.innerHTML = COMMON_CONNECTORS.map(c => 
-                `<option value="${c.id}">${c.name}</option>`
-            ).join('');
+            datalist.innerHTML = COMMON_CONNECTORS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
 
         function renderStages() {
@@ -214,26 +246,29 @@
 
             const thead = document.querySelector(`#${tableId} thead`);
             const tbody = document.querySelector(`#${tableId} tbody`);
+            
+            // Header BG color handling for Sticky effect
+            const headerBgClass = document.documentElement.classList.contains('dark') ? 'bg-zinc-900' : 'bg-slate-50';
 
             // Header
-            let headerHTML = `<tr><th class="px-4 py-3 min-w-[250px]">${keyLabel}</th>`;
+            let headerHTML = `<tr><th class="px-4 py-3 min-w-[250px] border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${keyLabel}</th>`;
             state.stages.forEach(stage => {
-                headerHTML += `<th class="px-4 py-3 min-w-[180px]">${escapeHtml(stage)}`;
-                // Only show "Connection ID (GUID)" if in Connection Reference tab
+                headerHTML += `<th class="px-4 py-3 min-w-[180px] border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${escapeHtml(stage)}`;
                 if (type === 'conn') {
                     headerHTML += ` <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span>`;
                 }
                 headerHTML += `</th>`;
             });
-            headerHTML += `<th class="px-4 py-3 w-10"></th></tr>`;
+            headerHTML += `<th class="px-4 py-3 w-10 border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}"></th></tr>`;
             thead.innerHTML = headerHTML;
 
             // Body
             tbody.innerHTML = data.map(row => {
-                let rowHTML = `<tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors duration-150">`;
+                // Highlighting active row logic added
+                let rowHTML = `<tr class="group hover:bg-slate-50 dark:hover:bg-zinc-800/50 focus-within:bg-blue-50 dark:focus-within:bg-blue-900/10 transition-colors duration-150">`;
                 
                 // Column 1: Definition
-                rowHTML += `<td class="px-4 py-3 space-y-2">                    
+                rowHTML += `<td class="px-4 py-3 space-y-2 border-b border-slate-100 dark:border-zinc-800">                    
                     <input type="text" placeholder="${type === 'env' ? 'Schema Name' : 'Logical Name'}" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)" 
                         class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-medium">`;
                 
@@ -249,19 +284,19 @@
                     const val = row.values[stage] || '';
                     
                     if (type === 'env') {
-                        rowHTML += `<td class="px-4 py-3 align-top">
+                        rowHTML += `<td class="px-4 py-3 align-top border-b border-slate-100 dark:border-zinc-800">
                             <input type="text" placeholder="Value" value="${escapeHtml(val)}" oninput="updateValue('env', ${row.id}, '${safeStage}', this.value)"
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                         </td>`;
                     } else {
-                        rowHTML += `<td class="px-4 py-3 align-top">
+                        rowHTML += `<td class="px-4 py-3 align-top border-b border-slate-100 dark:border-zinc-800">
                             <input type="text" placeholder="GUID" value="${escapeHtml(val)}" oninput="updateValue('conn', ${row.id}, '${safeStage}', this.value)"
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs">
                         </td>`;
                     }
                 });
 
-                rowHTML += `<td class="px-4 py-3 text-center align-top pt-4">
+                rowHTML += `<td class="px-4 py-3 text-center align-top pt-4 border-b border-slate-100 dark:border-zinc-800">
                     <button onclick="deleteRow('${type}', ${row.id})" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-lg leading-none">&times;</button>
                 </td></tr>`;
                 return rowHTML;
@@ -293,11 +328,12 @@
                     section.classList.add('hidden');
                 }
             });
+            // Refresh table on tab switch to ensure column widths/sticky headers calculate correctly
+            renderTable(tab);
         }
 
         function addStage() {
             const input = document.getElementById('newStageInput');
-            // FIX: Ensure new stages are always uppercase
             const val = input.value.trim().toUpperCase();
             if(val && !state.stages.includes(val)) {
                 state.stages.push(val);
@@ -317,7 +353,6 @@
         function addRow(type) {
             const newRow = { id: Date.now(), key: '', values: {} };
             if(type === 'conn') newRow.connectorId = ''; 
-            
             const list = type === 'env' ? state.envVars : state.connRefs;
             list.push(newRow);
             saveState(); renderTable(type);
@@ -329,22 +364,23 @@
             saveState(); renderTable(type); generateJSON();
         }
 
+        // Updated Update Functions (Now using Debounce)
         function updateKey(type, id, val) {
             const list = type === 'env' ? state.envVars : state.connRefs;
             const item = list.find(r => r.id === id);
-            if(item) { item.key = val; saveState(); generateJSON(); }
+            if(item) { item.key = val; debouncedSaveAndGenerate(); }
         }
 
         function updateConnectorId(id, val) {
             const item = state.connRefs.find(r => r.id === id);
-            if(item) { item.connectorId = val; saveState(); generateJSON(); }
+            if(item) { item.connectorId = val; debouncedSaveAndGenerate(); }
         }
 
         function updateValue(type, id, stage, val) {
             const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
             const list = type === 'env' ? state.envVars : state.connRefs;
             const item = list.find(r => r.id === id);
-            if(item) { item.values[realStage] = val; saveState(); generateJSON(); }
+            if(item) { item.values[realStage] = val; debouncedSaveAndGenerate(); }
         }
 
         function refreshAll() {
@@ -355,11 +391,9 @@
         function buildPayload(stage) {
             const output = { "EnvironmentVariables": [], "ConnectionReferences": [] };
             const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
-
             state.envVars.forEach(v => {
                 if(v.key) output.EnvironmentVariables.push({ "SchemaName": v.key, "Value": v.values[realStage] || "" });
             });
-
             state.connRefs.forEach(c => {
                 if(c.key) {
                     output.ConnectionReferences.push({
