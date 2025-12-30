@@ -58,7 +58,7 @@ jobs:
   # ------------------------------------------------------------------
   deploy:
     name: 🚀 Deploy to GitHub Pages
-    needs: quality-check # <--- THIS IS THE KEY! Gates deployment behind tests.
+    needs: quality-check
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -71,10 +71,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # NEW STEP: Injects Commit Hash & Time into HTML
+      - name: Inject Build Version
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          BUILD_DATE=$(date -u +'%Y-%m-%d %H:%M UTC')
+          sed -i "s/__BUILD_VERSION__/$SHORT_SHA  •  $BUILD_DATE/g" index.html
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: '.'
 
       - name: Deploy to GitHub Pages
