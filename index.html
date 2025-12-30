@@ -104,9 +104,14 @@
                         <tbody class="divide-y divide-slate-200 dark:divide-zinc-700"></tbody>
                     </table>
                 </div>
-                <button onclick="addRow('env')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
-                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Variable
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="addRow('env')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
+                        <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Variable
+                    </button>
+                    <button id="btn-sort-env" onclick="sortRows('env')" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium text-sm transition-colors duration-200 ml-2" title="Sort by Schema Name">
+                        <span id="txt-sort-env">↓ A-Z</span>
+                    </button>
+                </div>
             </div>
 
             <div id="section-conn" class="hidden animate-fade-in">
@@ -116,9 +121,14 @@
                         <tbody class="divide-y divide-slate-200 dark:divide-zinc-700"></tbody>
                     </table>
                 </div>
-                <button onclick="addRow('conn')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
-                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Reference
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="addRow('conn')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
+                        <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Reference
+                    </button>
+                    <button id="btn-sort-conn" onclick="sortRows('conn')" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium text-sm transition-colors duration-200 ml-2" title="Sort by Logical Name">
+                        <span id="txt-sort-conn">↓ A-Z</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -210,6 +220,12 @@
         };
 
         let state = JSON.parse(JSON.stringify(defaultState));
+        
+        // Sorting State Tracking
+        let sortState = {
+            env: 'asc',
+            conn: 'asc'
+        };
 
         // Create debounced version of save & generate
         const debouncedSaveAndGenerate = debounce(() => {
@@ -268,7 +284,7 @@
             
             const headerBgClass = document.documentElement.classList.contains('dark') ? 'bg-zinc-900' : 'bg-slate-50';
 
-            // FIXED WIDTH LOGIC: 450px is the sweet spot (reduced from 650px)
+            // FIXED WIDTH LOGIC: 450px for Connector ID
             const firstColClass = type === 'conn' ? 'min-w-[450px]' : 'min-w-[350px]';
 
             // Header
@@ -381,6 +397,37 @@
             const list = type === 'env' ? state.envVars : state.connRefs;
             list.push(newRow);
             saveState(); renderTable(type);
+        }
+
+        // Updated Sorting Logic: Bi-directional
+        function sortRows(type) {
+            const list = type === 'env' ? state.envVars : state.connRefs;
+            const currentDir = sortState[type];
+            
+            // Toggle direction for next time
+            const nextDir = currentDir === 'asc' ? 'desc' : 'asc';
+            sortState[type] = nextDir;
+
+            list.sort((a, b) => {
+                const keyA = (a.key || '').toLowerCase();
+                const keyB = (b.key || '').toLowerCase();
+                
+                if (keyA < keyB) return currentDir === 'asc' ? -1 : 1;
+                if (keyA > keyB) return currentDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            saveState();
+            renderTable(type);
+            generateJSON();
+            
+            // Update UI Button Text
+            const btnText = document.getElementById(`txt-sort-${type}`);
+            if(btnText) {
+                btnText.textContent = nextDir === 'asc' ? '↓ A-Z' : '↑ Z-A';
+            }
+            
+            showToast(`Sorted ${currentDir === 'asc' ? 'A-Z' : 'Z-A'}`);
         }
 
         function deleteRow(type, id) {
