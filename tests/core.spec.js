@@ -28,7 +28,6 @@ test('Can add a new Environment Variable and update JSON', async ({ page }) => {
   // 4. Verify JSON Output updates (Using toContainText handles the debounce delay)
   const jsonOutput = page.locator('#jsonOutput');
   
-  // FIX: Wait for the text to appear (handles the 300ms debounce)
   await expect(jsonOutput).toContainText('cr56_test_automated');
   await expect(jsonOutput).toContainText('automated_value');
 });
@@ -44,9 +43,10 @@ test('Security: Scripts are escaped (XSS Check)', async ({ page }) => {
   // 3. Check JSON output
   const jsonOutput = page.locator('#jsonOutput');
 
-  // FIX: Wait for the escaped text to appear
-  // Note: JSON.stringify will escape quotes, so we check for the content safely
-  await expect(jsonOutput).toContainText('<script>alert("hacked")</script>');
+  // FIX: JSON.stringify escapes quotes (e.g. " becomes \")
+  // We need to match that escaped format in the output check.
+  // Note: In JS strings, we must double-escape the backslash (\\") to represent a literal backslash.
+  await expect(jsonOutput).toContainText('<script>alert(\\"hacked\\")</script>');
 
   // 4. Ensure the DOM input value remains exactly what was typed (not double encoded)
   await expect(inputs.last()).toHaveValue('<script>alert("hacked")</script>');
@@ -61,6 +61,5 @@ test('Can delete a row', async ({ page }) => {
   await page.getByLabel('Delete row 1').first().click();
 
   // 3. Verify count decreases
-  // FIX: Using expect().toHaveCount() automatically retries until the animation finishes
   await expect(rows).toHaveCount(initialCount - 1);
 });
