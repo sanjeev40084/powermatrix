@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Securely generate Power Platform deployment settings JSON for ALM pipelines.">
     <title>Power Platform Deployment Settings</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,15 +69,33 @@
                 <p class="text-slate-500 dark:text-zinc-400 text-sm mt-0.5 font-medium">Generate your pipeline configuration JSON instantly.</p>
             </div>
             
-            <div class="flex items-center gap-3">
-                <button onclick="resetData()" class="group flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200" title="Reset Data">
-                    <span class="group-hover:rotate-180 transition-transform duration-500">🗑️</span> Reset
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="triggerTemplateImport()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 text-sm font-medium transition-all duration-200 shadow-sm text-blue-600 dark:text-blue-400" aria-label="Import a deployment settings JSON template">
+                    <span aria-hidden="true">📄</span> <span class="hidden sm:inline">Import Template</span>
                 </button>
-                <button onclick="toggleTheme()" class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all duration-300 transform hover:scale-105" title="Toggle Theme">
-                    <span id="themeIcon" class="text-lg">🌙</span>
+
+                <div class="h-6 w-px bg-slate-300 dark:bg-zinc-700 mx-1" aria-hidden="true"></div>
+
+                <button onclick="triggerProjectImport()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200">
+                    <span aria-hidden="true">📂</span> <span class="hidden sm:inline">Load Project</span>
+                </button>
+                <button onclick="exportProjectState()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200">
+                    <span aria-hidden="true">💾</span> <span class="hidden sm:inline">Save Project</span>
+                </button>
+                
+                <div class="h-6 w-px bg-slate-300 dark:bg-zinc-700 mx-1" aria-hidden="true"></div>
+
+                <button onclick="resetData()" class="group flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700" aria-label="Reset all data">
+                    <span class="group-hover:rotate-180 transition-transform duration-500" aria-hidden="true">🗑️</span> <span class="hidden sm:inline">Reset</span>
+                </button>
+                <button onclick="toggleTheme()" class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all duration-300 transform hover:scale-105" aria-label="Toggle Dark Mode">
+                    <span id="themeIcon" class="text-lg" aria-hidden="true">🌙</span>
                 </button>
             </div>
         </header>
+
+        <input type="file" id="projectUpload" class="hidden" accept=".json" onchange="handleProjectUpload(this)">
+        <input type="file" id="templateUpload" class="hidden" accept=".json" onchange="handleTemplateUpload(this)">
 
         <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-700 p-6 transition-all duration-300">
             <h2 class="text-lg font-semibold border-b border-slate-100 dark:border-zinc-700 pb-4 mb-6">Configuration Matrix</h2>
@@ -87,17 +106,17 @@
                     <div id="stageList" class="flex flex-wrap gap-2 transition-all duration-300"></div>
                 </div>
                 <div class="flex w-full md:w-auto gap-2">
-                    <input type="text" id="newStageInput" placeholder="New Stage (e.g. UAT)" class="flex-1 md:w-40 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 uppercase font-medium" style="text-transform: uppercase;"> 
+                    <input type="text" id="newStageInput" placeholder="New Stage (e.g. UAT)" aria-label="Enter new stage name" class="flex-1 md:w-40 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 uppercase font-medium" style="text-transform: uppercase;"> 
                     <button onclick="addStage()" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700 active:transform active:scale-95 transition-all duration-200 shadow-sm">Add</button>
                 </div>
             </div>
 
-            <div class="flex gap-8 border-b border-slate-200 dark:border-zinc-700 mb-6">
-                <button onclick="switchTab('env')" id="tab-env" class="pb-3 text-sm font-medium border-b-2 border-primary text-primary transition-colors duration-200">Environment Variables</button>
-                <button onclick="switchTab('conn')" id="tab-conn" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors duration-200">Connection References</button>
+            <div class="flex gap-8 border-b border-slate-200 dark:border-zinc-700 mb-6" role="tablist">
+                <button onclick="switchTab('env')" id="tab-env" role="tab" aria-selected="true" class="pb-3 text-sm font-medium border-b-2 border-primary text-primary transition-colors duration-200">Environment Variables</button>
+                <button onclick="switchTab('conn')" id="tab-conn" role="tab" aria-selected="false" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors duration-200">Connection References</button>
             </div>
 
-            <div id="section-env" class="animate-fade-in">
+            <div id="section-env" class="animate-fade-in" role="tabpanel" aria-labelledby="tab-env">
                 <div class="overflow-auto max-h-[60vh] mb-4 border border-slate-200 dark:border-zinc-700 rounded-md relative">
                     <table id="envTable" class="w-full text-sm text-left border-separate border-spacing-0">
                         <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold"></thead>
@@ -106,7 +125,7 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="addRow('env')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
-                        <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Variable
+                        <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors" aria-hidden="true">+</span> Add Variable
                     </button>
                     <button id="btn-sort-env" onclick="sortRows('env')" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium text-sm transition-colors duration-200 ml-2" title="Sort by Schema Name">
                         <span id="txt-sort-env">↓ A-Z</span>
@@ -114,7 +133,7 @@
                 </div>
             </div>
 
-            <div id="section-conn" class="hidden animate-fade-in">
+            <div id="section-conn" class="hidden animate-fade-in" role="tabpanel" aria-labelledby="tab-conn">
                 <div class="overflow-auto max-h-[60vh] mb-4 border border-slate-200 dark:border-zinc-700 rounded-md relative">
                     <table id="connTable" class="w-full text-sm text-left border-separate border-spacing-0">
                         <thead class="bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-semibold"></thead>
@@ -123,7 +142,7 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="addRow('conn')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
-                        <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">+</span> Add Reference
+                        <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors" aria-hidden="true">+</span> Add Reference
                     </button>
                     <button id="btn-sort-conn" onclick="sortRows('conn')" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium text-sm transition-colors duration-200 ml-2" title="Sort by Logical Name">
                         <span id="txt-sort-conn">↓ A-Z</span>
@@ -136,20 +155,20 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <h3 class="font-semibold text-lg">JSON Output</h3>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <select id="stageSelect" onchange="generateJSON()" class="flex-1 sm:w-48 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium"></select>
+                    <select id="stageSelect" aria-label="Select stage to export" onchange="generateJSON()" class="flex-1 sm:w-48 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium"></select>
                     
                     <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard">📋</button>
                     <button onclick="downloadSelected()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download Current JSON">📥</button>
                     <button onclick="downloadAll()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download ALL Stages (Batch)">📦</button>
                 </div>
             </div>
-            <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner transition-all duration-300">{}</pre>
+            <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner transition-all duration-300" tabindex="0">{}</pre>
         </div>
     </div>
 
     <datalist id="connectorList"></datalist>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded shadow-lg font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50">Copied to clipboard!</div>
+    <div id="toast" role="alert" aria-live="polite" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded shadow-lg font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50">Copied to clipboard!</div>
 
     <script>
         // --- DATA: Common Connectors ---
@@ -166,7 +185,7 @@
             { name: "Azure DevOps", id: "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices" }
         ];
 
-        // --- UTILS: Debounce & Security ---
+        // --- UTILS: Security & Helpers ---
         function debounce(func, wait) {
             let timeout;
             return function(...args) {
@@ -176,12 +195,17 @@
             };
         }
 
+        // XSS Protection: Used on all dynamic HTML injection
         function escapeHtml(unsafe) {
             if (unsafe === null || unsafe === undefined) return '';
             return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // --- VALIDATION: GUID Check ---
+        // Generate Secure Unique IDs
+        function generateId() {
+            return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        }
+
         function isValidGuid(guid) {
             const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             return regex.test(guid);
@@ -215,19 +239,13 @@
         // --- STATE MANAGEMENT ---
         const defaultState = {
             stages: ['QA', 'TST', 'PRD'],
-            envVars: [{ id: 1, key: 'cr56_sample_var', values: { 'QA': 'val_qa', 'TST': 'val_tst', 'PRD': 'val_prd' } }],
-            connRefs: [{ id: 1, key: 'cr56_shared_sharepoint', connectorId: '', values: { 'QA': '', 'TST': '', 'PRD': '' } }]
+            envVars: [{ id: 'init-env-1', key: 'cr56_sample_var', values: { 'QA': 'val_qa', 'TST': 'val_tst', 'PRD': 'val_prd' } }],
+            connRefs: [{ id: 'init-conn-1', key: 'cr56_shared_sharepoint', connectorId: '', values: { 'QA': '', 'TST': '', 'PRD': '' } }]
         };
 
         let state = JSON.parse(JSON.stringify(defaultState));
-        
-        // Sorting State Tracking
-        let sortState = {
-            env: 'asc',
-            conn: 'asc'
-        };
+        let sortState = { env: 'asc', conn: 'asc' };
 
-        // Create debounced version of save & generate
         const debouncedSaveAndGenerate = debounce(() => {
             saveState();
             generateJSON();
@@ -238,6 +256,8 @@
             if (saved) {
                 try { state = JSON.parse(saved); } catch(e) { console.error("Failed load", e); }
             }
+            if (!state.envVars) state.envVars = JSON.parse(JSON.stringify(defaultState.envVars));
+            if (!state.connRefs) state.connRefs = JSON.parse(JSON.stringify(defaultState.connRefs));
         }
 
         function saveState() {
@@ -251,6 +271,86 @@
                 refreshAll();
                 showToast("Data reset successfully");
             }
+        }
+
+        // --- FILE OPERATIONS ---
+        function exportProjectState() {
+            const timestamp = new Date().toISOString().slice(0, 10);
+            downloadStringAsFile(`powermatrix-project-${timestamp}.json`, JSON.stringify(state, null, 2));
+            showToast("Project saved!");
+        }
+
+        function triggerProjectImport() { document.getElementById('projectUpload').click(); }
+
+        function handleProjectUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            // Security: Limit file size to 2MB to prevent browser crash from massive JSON
+            if (file.size > 2 * 1024 * 1024) { alert("File too large (max 2MB)"); return; }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported.EnvironmentVariables || imported.ConnectionReferences) {
+                        alert("Use 'Import Template' button for deployment-settings.json files.");
+                        return;
+                    }
+                    if (Array.isArray(imported.stages) && Array.isArray(imported.envVars)) {
+                        state = imported;
+                        saveState(); refreshAll();
+                        showToast("Project loaded!");
+                    } else { alert("Invalid project file."); }
+                } catch (err) { alert("Error: " + err.message); }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function triggerTemplateImport() { document.getElementById('templateUpload').click(); }
+
+        function handleTemplateUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!imported.EnvironmentVariables && !imported.ConnectionReferences) {
+                        alert("Invalid template. Please upload a deployment-settings.json file.");
+                        return;
+                    }
+
+                    if(confirm("Importing a template will overwrite your current variables and connection references. Do you want to proceed?")) {
+                        state.envVars = [];
+                        state.connRefs = [];
+                        let addedCount = 0;
+
+                        if (imported.EnvironmentVariables) {
+                            imported.EnvironmentVariables.forEach(item => {
+                                if (item.SchemaName) {
+                                    state.envVars.push({ id: generateId(), key: item.SchemaName, values: {} });
+                                    addedCount++;
+                                }
+                            });
+                        }
+
+                        if (imported.ConnectionReferences) {
+                            imported.ConnectionReferences.forEach(item => {
+                                if (item.LogicalName) {
+                                    state.connRefs.push({ id: generateId(), key: item.LogicalName, connectorId: item.ConnectorId || '', values: {} });
+                                    addedCount++;
+                                }
+                            });
+                        }
+
+                        saveState(); refreshAll();
+                        showToast(`Template imported! (${addedCount} items)`);
+                    }
+                } catch (err) { alert("Error parsing template: " + err.message); }
+                input.value = '';
+            };
+            reader.readAsText(file);
         }
 
         // --- RENDER FUNCTIONS ---
@@ -269,7 +369,7 @@
         function renderStages() {
             document.getElementById('stageList').innerHTML = state.stages.map(s => 
                 `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 animate-fade-in">
-                    ${escapeHtml(s)} <button onclick="removeStage('${escapeHtml(s)}')" class="ml-2 hover:text-blue-600 dark:hover:text-blue-200 focus:outline-none text-base leading-none">&times;</button>
+                    ${escapeHtml(s)} <button onclick="removeStage('${escapeHtml(s)}')" class="ml-2 hover:text-blue-600 dark:hover:text-blue-200 focus:outline-none text-base leading-none" aria-label="Remove stage ${escapeHtml(s)}">&times;</button>
                 </span>`
             ).join('');
         }
@@ -283,33 +383,31 @@
             const tbody = document.querySelector(`#${tableId} tbody`);
             
             const headerBgClass = document.documentElement.classList.contains('dark') ? 'bg-zinc-900' : 'bg-slate-50';
-
-            // FIXED WIDTH LOGIC: 450px for Connector ID
             const firstColClass = type === 'conn' ? 'min-w-[450px]' : 'min-w-[350px]';
 
-            // Header
-            let headerHTML = `<tr><th class="px-4 py-3 ${firstColClass} border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${keyLabel}</th>`;
+            // Header - Added scope="col" for A11y
+            let headerHTML = `<tr><th scope="col" class="px-4 py-3 ${firstColClass} border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${keyLabel}</th>`;
             state.stages.forEach(stage => {
-                headerHTML += `<th class="px-4 py-3 min-w-[180px] border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${escapeHtml(stage)}`;
+                headerHTML += `<th scope="col" class="px-4 py-3 min-w-[180px] border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${escapeHtml(stage)}`;
                 if (type === 'conn') {
                     headerHTML += ` <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span>`;
                 }
                 headerHTML += `</th>`;
             });
-            headerHTML += `<th class="px-4 py-3 w-10 border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}"></th></tr>`;
+            headerHTML += `<th scope="col" class="px-4 py-3 w-10 border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}"></th></tr>`;
             thead.innerHTML = headerHTML;
 
             // Body
-            tbody.innerHTML = data.map(row => {
+            tbody.innerHTML = data.map((row, index) => {
                 let rowHTML = `<tr class="group hover:bg-slate-50 dark:hover:bg-zinc-800/50 focus-within:bg-blue-50 dark:focus-within:bg-blue-900/10 transition-colors duration-150">`;
                 
-                // Column 1: Definition
+                // Column 1
                 rowHTML += `<td class="px-4 py-3 space-y-2 border-b border-slate-100 dark:border-zinc-800 align-top">                    
-                    <input type="text" placeholder="${type === 'env' ? 'Schema Name' : 'Logical Name'}" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', ${row.id}, this.value)" 
+                    <input type="text" id="input-${row.id}-key" aria-label="${keyLabel} for row ${index+1}" placeholder="${type === 'env' ? 'Schema Name' : 'Logical Name'}" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', '${row.id}', this.value)" 
                         class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-medium">`;
                 
                 if(type === 'conn') {
-                    rowHTML += `<input type="text" list="connectorList" placeholder="Connector ID (Type to search...)" value="${escapeHtml(row.connectorId || '')}" oninput="updateConnectorId(${row.id}, this.value)"
+                    rowHTML += `<input type="text" list="connectorList" aria-label="Connector ID for row ${index+1}" placeholder="Connector ID (Type to search...)" value="${escapeHtml(row.connectorId || '')}" oninput="updateConnectorId('${row.id}', this.value)"
                         class="w-full px-2 py-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-600 dark:text-zinc-400" title="Select common connector or type custom ID">`;
                 }
                 rowHTML += `</td>`;
@@ -326,20 +424,20 @@
 
                     if (type === 'env') {
                         rowHTML += `<td class="px-4 py-3 align-top border-b border-slate-100 dark:border-zinc-800">
-                            <input type="text" placeholder="Value" value="${escapeHtml(val)}" oninput="updateValue('env', ${row.id}, '${safeStage}', this.value)"
+                            <input type="text" aria-label="Value for ${safeStage} in row ${index+1}" placeholder="Value" value="${escapeHtml(val)}" oninput="updateValue('env', '${row.id}', '${safeStage}', this.value)"
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                         </td>`;
                     } else {
                         rowHTML += `<td class="px-4 py-3 align-top border-b border-slate-100 dark:border-zinc-800">
-                            <input type="text" placeholder="GUID" value="${escapeHtml(val)}" 
-                            oninput="updateValue('conn', ${row.id}, '${safeStage}', this.value); this.classList.toggle('invalid-guid', this.value.trim() !== '' && !isValidGuid(this.value.trim()))"
+                            <input type="text" aria-label="Connection GUID for ${safeStage} in row ${index+1}" placeholder="GUID" value="${escapeHtml(val)}" 
+                            oninput="updateValue('conn', '${row.id}', '${safeStage}', this.value); this.classList.toggle('invalid-guid', this.value.trim() !== '' && !isValidGuid(this.value.trim()))"
                             class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs ${validClass}">
                         </td>`;
                     }
                 });
 
                 rowHTML += `<td class="px-4 py-3 text-center align-top pt-4 border-b border-slate-100 dark:border-zinc-800">
-                    <button onclick="deleteRow('${type}', ${row.id})" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-lg leading-none">&times;</button>
+                    <button onclick="deleteRow('${type}', '${row.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-lg leading-none" aria-label="Delete row ${index+1}">&times;</button>
                 </td></tr>`;
                 return rowHTML;
             }).join('');
@@ -359,6 +457,11 @@
         function switchTab(tab) {
             const activeClass = ['border-primary', 'text-primary'];
             const inactiveClass = ['border-transparent', 'text-slate-500', 'dark:text-zinc-400'];
+            
+            // Set ARIA states
+            document.getElementById('tab-env').setAttribute('aria-selected', tab === 'env');
+            document.getElementById('tab-conn').setAttribute('aria-selected', tab === 'conn');
+
             ['env', 'conn'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const section = document.getElementById(`section-${t}`);
@@ -392,26 +495,34 @@
         }
 
         function addRow(type) {
-            const newRow = { id: Date.now(), key: '', values: {} };
+            const newRow = { id: generateId(), key: '', values: {} };
             if(type === 'conn') newRow.connectorId = ''; 
             const list = type === 'env' ? state.envVars : state.connRefs;
             list.push(newRow);
-            saveState(); renderTable(type);
+            saveState(); 
+            renderTable(type);
+            // Accessibility UX: Auto-focus the new input
+            setTimeout(() => {
+                const input = document.getElementById(`input-${newRow.id}-key`);
+                if(input) input.focus();
+            }, 50);
         }
 
-        // Updated Sorting Logic: Bi-directional
+        function deleteRow(type, id) {
+            if(type === 'env') state.envVars = state.envVars.filter(r => r.id !== id);
+            else state.connRefs = state.connRefs.filter(r => r.id !== id);
+            saveState(); renderTable(type); generateJSON();
+        }
+
         function sortRows(type) {
             const list = type === 'env' ? state.envVars : state.connRefs;
             const currentDir = sortState[type];
-            
-            // Toggle direction for next time
             const nextDir = currentDir === 'asc' ? 'desc' : 'asc';
             sortState[type] = nextDir;
 
             list.sort((a, b) => {
                 const keyA = (a.key || '').toLowerCase();
                 const keyB = (b.key || '').toLowerCase();
-                
                 if (keyA < keyB) return currentDir === 'asc' ? -1 : 1;
                 if (keyA > keyB) return currentDir === 'asc' ? 1 : -1;
                 return 0;
@@ -421,22 +532,11 @@
             renderTable(type);
             generateJSON();
             
-            // Update UI Button Text
             const btnText = document.getElementById(`txt-sort-${type}`);
-            if(btnText) {
-                btnText.textContent = nextDir === 'asc' ? '↓ A-Z' : '↑ Z-A';
-            }
-            
+            if(btnText) btnText.textContent = nextDir === 'asc' ? '↓ A-Z' : '↑ Z-A';
             showToast(`Sorted ${currentDir === 'asc' ? 'A-Z' : 'Z-A'}`);
         }
 
-        function deleteRow(type, id) {
-            if(type === 'env') state.envVars = state.envVars.filter(r => r.id !== id);
-            else state.connRefs = state.connRefs.filter(r => r.id !== id);
-            saveState(); renderTable(type); generateJSON();
-        }
-
-        // Updated Update Functions (Now using Debounce)
         function updateKey(type, id, val) {
             const list = type === 'env' ? state.envVars : state.connRefs;
             const item = list.find(r => r.id === id);
@@ -498,7 +598,6 @@
             });
         }
 
-        // Helper to trigger file download
         function downloadStringAsFile(filename, content) {
             const blob = new Blob([content], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -511,13 +610,10 @@
             URL.revokeObjectURL(url);
         }
 
-        // NEW: Download currently selected stage
         function downloadSelected() {
             const stage = document.getElementById('stageSelect').value;
             if(!stage) { showToast("No stage selected!"); return; }
-            
             if (stage === 'ALL') {
-                // If "ALL" is selected in dropdown, assume they want the combined file
                 const data = buildAllPayload();
                 downloadStringAsFile(`deployment-settings-ALL.json`, JSON.stringify(data, null, 2));
             } else {
@@ -527,17 +623,13 @@
             showToast(`Downloaded: ${stage}`);
         }
 
-        // NEW: Download ALL stages as individual files (Batch)
         async function downloadAll() {
             if (state.stages.length === 0) { showToast("No stages to download."); return; }
-            
             showToast(`Starting batch download for ${state.stages.length} files...`);
-            
             for (let i = 0; i < state.stages.length; i++) {
                 const stage = state.stages[i];
                 const data = buildPayload(stage);
                 downloadStringAsFile(`deployment-settings-${stage}.json`, JSON.stringify(data, null, 2));
-                // Small delay to prevent browser from blocking multiple downloads
                 await new Promise(r => setTimeout(r, 500));
             }
         }
