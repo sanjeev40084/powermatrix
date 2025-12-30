@@ -3,22 +3,22 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Allows you to run this manually if needed
+  pull_request:        # <--- New Trigger: Runs on PRs targeting main
+    branches: [ main ]
+  workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: QUALITY CHECKS (Must pass for deployment to start)
+  # JOB 1: QUALITY CHECKS (Runs on PRs AND Pushes)
   # ------------------------------------------------------------------
   quality-check:
     name: 🧪 Run Automated Tests
@@ -54,11 +54,13 @@ jobs:
           retention-days: 5
 
   # ------------------------------------------------------------------
-  # JOB 2: DEPLOY TO GITHUB PAGES (Runs only if 'quality-check' passes)
+  # JOB 2: DEPLOY (Runs ONLY on Push to Main, skipped on PRs)
   # ------------------------------------------------------------------
   deploy:
     name: 🚀 Deploy to GitHub Pages
-    needs: quality-check # <--- THIS IS THE KEY! Gates deployment behind tests.
+    needs: quality-check
+    # This condition ensures we don't deploy PR builds to the live site
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -71,10 +73,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # Injects Commit Hash & Time into HTML Footer
+      - name: Inject Build Version
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          BUILD_DATE=$(date -u +'%Y-%m-%d %H:%M UTC')
+          sed -i "s/__BUILD_VERSION__/$SHORT_SHA  •  $BUILD_DATE/g" index.html
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: '.'
 
       - name: Deploy to GitHub Pages
