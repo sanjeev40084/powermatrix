@@ -34,7 +34,7 @@ jobs:
         sleep 3
         
         # Run the tests
-        npx playwright test
+        npx playwright test --reporter=html
 
     - name: Upload Test Report
       if: always()
