@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Securely generate Power Platform deployment settings JSON for ALM pipelines.">
+    <meta name="description" content="Securely generate Power Platform deployment settings JSON for ALM pipelines. Accessible and runs locally.">
     <title>Power Platform Deployment Settings</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,14 +49,15 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .transition-all-300 { transition: all 0.3s ease-in-out; }
         
-        /* Sticky Header Support */
         th { position: sticky; top: 0; z-index: 10; }
         .light-header-bg { background-color: #f8fafc; } 
         .dark-header-bg { background-color: #18181b; } 
         
-        /* Validation Styles */
         .invalid-guid { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
         .dark .invalid-guid { border-color: #ef4444 !important; background-color: #450a0a !important; }
+        
+        /* Accessibility Focus Ring */
+        *:focus-visible { outline: 2px solid #0078d4; outline-offset: 2px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:text-zinc-100 min-h-screen transition-colors duration-300 font-sans p-4 md:p-8">
@@ -70,32 +71,37 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-2">
-                <button onclick="triggerTemplateImport()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 text-sm font-medium transition-all duration-200 shadow-sm text-blue-600 dark:text-blue-400" aria-label="Import a deployment settings JSON template">
+                <button onclick="triggerTemplateImport()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 text-sm font-medium transition-all duration-200 shadow-sm text-blue-600 dark:text-blue-400" 
+                    title="Import a skeleton 'deployment-settings.json' file (e.g. from PAC CLI). This replaces current rows.">
                     <span aria-hidden="true">📄</span> <span class="hidden sm:inline">Import Template</span>
                 </button>
 
                 <div class="h-6 w-px bg-slate-300 dark:bg-zinc-700 mx-1" aria-hidden="true"></div>
 
-                <button onclick="triggerProjectImport()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200">
+                <button onclick="triggerProjectImport()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200"
+                    title="Restore a saved workspace file ('powermatrix-project.json') to resume editing.">
                     <span aria-hidden="true">📂</span> <span class="hidden sm:inline">Load Project</span>
                 </button>
-                <button onclick="exportProjectState()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200">
+                <button onclick="exportProjectState()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200"
+                    title="Download a backup of your current workspace ('powermatrix-project.json').">
                     <span aria-hidden="true">💾</span> <span class="hidden sm:inline">Save Project</span>
                 </button>
                 
                 <div class="h-6 w-px bg-slate-300 dark:bg-zinc-700 mx-1" aria-hidden="true"></div>
 
-                <button onclick="resetData()" class="group flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700" aria-label="Reset all data">
+                <button onclick="resetData()" class="group flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700" 
+                    title="Clear all data and reset to default state.">
                     <span class="group-hover:rotate-180 transition-transform duration-500" aria-hidden="true">🗑️</span> <span class="hidden sm:inline">Reset</span>
                 </button>
-                <button onclick="toggleTheme()" class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all duration-300 transform hover:scale-105" aria-label="Toggle Dark Mode">
+                <button onclick="toggleTheme()" class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all duration-300 transform hover:scale-105" 
+                    title="Toggle Dark/Light Mode">
                     <span id="themeIcon" class="text-lg" aria-hidden="true">🌙</span>
                 </button>
             </div>
         </header>
 
-        <input type="file" id="projectUpload" class="hidden" accept=".json" onchange="handleProjectUpload(this)">
-        <input type="file" id="templateUpload" class="hidden" accept=".json" onchange="handleTemplateUpload(this)">
+        <input type="file" id="projectUpload" class="hidden" accept=".json" onchange="handleProjectUpload(this)" aria-hidden="true">
+        <input type="file" id="templateUpload" class="hidden" accept=".json" onchange="handleTemplateUpload(this)" aria-hidden="true">
 
         <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-700 p-6 transition-all duration-300">
             <h2 class="text-lg font-semibold border-b border-slate-100 dark:border-zinc-700 pb-4 mb-6">Configuration Matrix</h2>
@@ -103,17 +109,17 @@
             <div class="flex flex-col md:flex-row gap-6 mb-8 items-start md:items-center justify-between">
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-sm font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Stages:</span>
-                    <div id="stageList" class="flex flex-wrap gap-2 transition-all duration-300"></div>
+                    <div id="stageList" class="flex flex-wrap gap-2 transition-all duration-300" role="list"></div>
                 </div>
                 <div class="flex w-full md:w-auto gap-2">
                     <input type="text" id="newStageInput" placeholder="New Stage (e.g. UAT)" aria-label="Enter new stage name" class="flex-1 md:w-40 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 uppercase font-medium" style="text-transform: uppercase;"> 
-                    <button onclick="addStage()" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700 active:transform active:scale-95 transition-all duration-200 shadow-sm">Add</button>
+                    <button onclick="addStage()" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700 active:transform active:scale-95 transition-all duration-200 shadow-sm" aria-label="Add new stage">Add</button>
                 </div>
             </div>
 
             <div class="flex gap-8 border-b border-slate-200 dark:border-zinc-700 mb-6" role="tablist">
-                <button onclick="switchTab('env')" id="tab-env" role="tab" aria-selected="true" class="pb-3 text-sm font-medium border-b-2 border-primary text-primary transition-colors duration-200">Environment Variables</button>
-                <button onclick="switchTab('conn')" id="tab-conn" role="tab" aria-selected="false" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors duration-200">Connection References</button>
+                <button onclick="switchTab('env')" id="tab-env" role="tab" aria-selected="true" aria-controls="section-env" class="pb-3 text-sm font-medium border-b-2 border-primary text-primary transition-colors duration-200">Environment Variables</button>
+                <button onclick="switchTab('conn')" id="tab-conn" role="tab" aria-selected="false" aria-controls="section-conn" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors duration-200">Connection References</button>
             </div>
 
             <div id="section-env" class="animate-fade-in" role="tabpanel" aria-labelledby="tab-env">
@@ -124,7 +130,7 @@
                     </table>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="addRow('env')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
+                    <button onclick="addRow('env')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group" aria-label="Add new environment variable row">
                         <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors" aria-hidden="true">+</span> Add Variable
                     </button>
                     <button id="btn-sort-env" onclick="sortRows('env')" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium text-sm transition-colors duration-200 ml-2" title="Sort by Schema Name">
@@ -141,7 +147,7 @@
                     </table>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="addRow('conn')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group">
+                    <button onclick="addRow('conn')" class="flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-medium text-sm transition-colors duration-200 group" aria-label="Add new connection reference row">
                         <span class="w-5 h-5 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors" aria-hidden="true">+</span> Add Reference
                     </button>
                     <button id="btn-sort-conn" onclick="sortRows('conn')" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium text-sm transition-colors duration-200 ml-2" title="Sort by Logical Name">
@@ -157,12 +163,12 @@
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <select id="stageSelect" aria-label="Select stage to export" onchange="generateJSON()" class="flex-1 sm:w-48 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium"></select>
                     
-                    <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard">📋</button>
-                    <button onclick="downloadSelected()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download Current JSON">📥</button>
-                    <button onclick="downloadAll()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download ALL Stages (Batch)">📦</button>
+                    <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard" aria-label="Copy JSON to clipboard">📋</button>
+                    <button onclick="downloadSelected()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download Current JSON" aria-label="Download current JSON file">📥</button>
+                    <button onclick="downloadAll()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download ALL Stages (Batch)" aria-label="Download JSON files for all stages">📦</button>
                 </div>
             </div>
-            <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner transition-all duration-300" tabindex="0">{}</pre>
+            <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner transition-all duration-300" tabindex="0" aria-label="JSON Output Preview">{}</pre>
         </div>
     </div>
 
@@ -185,7 +191,7 @@
             { name: "Azure DevOps", id: "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices" }
         ];
 
-        // --- UTILS: Security & Helpers ---
+        // --- UTILS ---
         function debounce(func, wait) {
             let timeout;
             return function(...args) {
@@ -195,13 +201,11 @@
             };
         }
 
-        // XSS Protection: Used on all dynamic HTML injection
         function escapeHtml(unsafe) {
             if (unsafe === null || unsafe === undefined) return '';
             return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Generate Secure Unique IDs
         function generateId() {
             return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         }
@@ -211,9 +215,23 @@
             return regex.test(guid);
         }
 
-        // --- THEME & STORAGE ---
+        // --- STATE & STORAGE ---
         const STORAGE_KEY = 'pp_deployment_settings_v3';
         const THEME_KEY = 'theme';
+
+        const defaultState = {
+            stages: ['QA', 'TST', 'PRD'],
+            envVars: [{ id: 'init-env-1', key: 'cr56_sample_var', values: { 'QA': 'val_qa', 'TST': 'val_tst', 'PRD': 'val_prd' } }],
+            connRefs: [{ id: 'init-conn-1', key: 'cr56_shared_sharepoint', connectorId: '', values: { 'QA': '', 'TST': '', 'PRD': '' } }]
+        };
+
+        let state = JSON.parse(JSON.stringify(defaultState));
+        let sortState = { env: 'asc', conn: 'asc' };
+
+        const debouncedSaveAndGenerate = debounce(() => {
+            saveState();
+            generateJSON();
+        }, 300);
 
         function initTheme() {
             const savedTheme = localStorage.getItem(THEME_KEY);
@@ -232,30 +250,12 @@
             setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
         }
 
-        function getCurrentTab() {
-            return document.getElementById('section-env').classList.contains('hidden') ? 'conn' : 'env';
-        }
-
-        // --- STATE MANAGEMENT ---
-        const defaultState = {
-            stages: ['QA', 'TST', 'PRD'],
-            envVars: [{ id: 'init-env-1', key: 'cr56_sample_var', values: { 'QA': 'val_qa', 'TST': 'val_tst', 'PRD': 'val_prd' } }],
-            connRefs: [{ id: 'init-conn-1', key: 'cr56_shared_sharepoint', connectorId: '', values: { 'QA': '', 'TST': '', 'PRD': '' } }]
-        };
-
-        let state = JSON.parse(JSON.stringify(defaultState));
-        let sortState = { env: 'asc', conn: 'asc' };
-
-        const debouncedSaveAndGenerate = debounce(() => {
-            saveState();
-            generateJSON();
-        }, 300);
-
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try { state = JSON.parse(saved); } catch(e) { console.error("Failed load", e); }
             }
+            // Ensure state integrity if loaded from old version or empty
             if (!state.envVars) state.envVars = JSON.parse(JSON.stringify(defaultState.envVars));
             if (!state.connRefs) state.connRefs = JSON.parse(JSON.stringify(defaultState.connRefs));
         }
@@ -266,7 +266,7 @@
 
         function resetData() {
             if(confirm("Reset all data? This cannot be undone.")) {
-                state = JSON.parse(JSON.stringify(defaultState));
+                state = JSON.parse(JSON.stringify(defaultState)); // Deep Copy
                 saveState();
                 refreshAll();
                 showToast("Data reset successfully");
@@ -281,25 +281,20 @@
         }
 
         function triggerProjectImport() { document.getElementById('projectUpload').click(); }
-
         function handleProjectUpload(input) {
             const file = input.files[0];
             if (!file) return;
-            // Security: Limit file size to 2MB to prevent browser crash from massive JSON
-            if (file.size > 2 * 1024 * 1024) { alert("File too large (max 2MB)"); return; }
-
+            if (file.size > 2 * 1024 * 1024) { alert("File too large"); return; }
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (imported.EnvironmentVariables || imported.ConnectionReferences) {
-                        alert("Use 'Import Template' button for deployment-settings.json files.");
-                        return;
+                        alert("Use 'Import Template' for deployment-settings.json files."); return;
                     }
                     if (Array.isArray(imported.stages) && Array.isArray(imported.envVars)) {
                         state = imported;
-                        saveState(); refreshAll();
-                        showToast("Project loaded!");
+                        saveState(); refreshAll(); showToast("Project loaded!");
                     } else { alert("Invalid project file."); }
                 } catch (err) { alert("Error: " + err.message); }
                 input.value = '';
@@ -308,7 +303,7 @@
         }
 
         function triggerTemplateImport() { document.getElementById('templateUpload').click(); }
-
+        
         function handleTemplateUpload(input) {
             const file = input.files[0];
             if (!file) return;
@@ -317,58 +312,54 @@
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (!imported.EnvironmentVariables && !imported.ConnectionReferences) {
-                        alert("Invalid template. Please upload a deployment-settings.json file.");
-                        return;
+                        alert("Invalid template file. Please upload deployment-settings.json."); return;
                     }
 
                     if(confirm("Importing a template will overwrite your current variables and connection references. Do you want to proceed?")) {
                         state.envVars = [];
                         state.connRefs = [];
-                        let addedCount = 0;
+                        let count = 0;
 
-                        if (imported.EnvironmentVariables) {
+                        if (Array.isArray(imported.EnvironmentVariables)) {
                             imported.EnvironmentVariables.forEach(item => {
-                                if (item.SchemaName) {
-                                    state.envVars.push({ id: generateId(), key: item.SchemaName, values: {} });
-                                    addedCount++;
+                                if (item.SchemaName) { 
+                                    state.envVars.push({ id: generateId(), key: item.SchemaName, values: {} }); 
+                                    count++; 
                                 }
                             });
                         }
 
-                        if (imported.ConnectionReferences) {
+                        if (Array.isArray(imported.ConnectionReferences)) {
                             imported.ConnectionReferences.forEach(item => {
-                                if (item.LogicalName) {
-                                    state.connRefs.push({ id: generateId(), key: item.LogicalName, connectorId: item.ConnectorId || '', values: {} });
-                                    addedCount++;
+                                if (item.LogicalName) { 
+                                    state.connRefs.push({ 
+                                        id: generateId(), 
+                                        key: item.LogicalName, 
+                                        connectorId: item.ConnectorId || '', 
+                                        values: {} 
+                                    }); 
+                                    count++; 
                                 }
                             });
                         }
-
-                        saveState(); refreshAll();
-                        showToast(`Template imported! (${addedCount} items)`);
+                        
+                        saveState(); 
+                        refreshAll(); 
+                        showToast(`Imported ${count} items!`);
                     }
-                } catch (err) { alert("Error parsing template: " + err.message); }
+                } catch (err) { alert("Error: " + err.message); }
                 input.value = '';
             };
             reader.readAsText(file);
         }
 
         // --- RENDER FUNCTIONS ---
-        function init() {
-            initTheme();
-            loadState();
-            renderDatalist();
-            refreshAll();
-        }
-
-        function renderDatalist() {
-            const datalist = document.getElementById('connectorList');
-            datalist.innerHTML = COMMON_CONNECTORS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        }
-
+        function init() { initTheme(); loadState(); renderDatalist(); refreshAll(); }
+        function renderDatalist() { document.getElementById('connectorList').innerHTML = COMMON_CONNECTORS.map(c => `<option value="${c.id}">${c.name}</option>`).join(''); }
+        
         function renderStages() {
             document.getElementById('stageList').innerHTML = state.stages.map(s => 
-                `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 animate-fade-in">
+                `<span role="listitem" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 animate-fade-in">
                     ${escapeHtml(s)} <button onclick="removeStage('${escapeHtml(s)}')" class="ml-2 hover:text-blue-600 dark:hover:text-blue-200 focus:outline-none text-base leading-none" aria-label="Remove stage ${escapeHtml(s)}">&times;</button>
                 </span>`
             ).join('');
@@ -378,20 +369,17 @@
             const tableId = type === 'env' ? 'envTable' : 'connTable';
             const data = type === 'env' ? state.envVars : state.connRefs;
             const keyLabel = type === 'env' ? 'Schema Name' : 'Definition';
-
-            const thead = document.querySelector(`#${tableId} thead`);
             const tbody = document.querySelector(`#${tableId} tbody`);
+            const thead = document.querySelector(`#${tableId} thead`);
             
             const headerBgClass = document.documentElement.classList.contains('dark') ? 'bg-zinc-900' : 'bg-slate-50';
             const firstColClass = type === 'conn' ? 'min-w-[450px]' : 'min-w-[350px]';
 
-            // Header - Added scope="col" for A11y
+            // Header
             let headerHTML = `<tr><th scope="col" class="px-4 py-3 ${firstColClass} border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${keyLabel}</th>`;
             state.stages.forEach(stage => {
                 headerHTML += `<th scope="col" class="px-4 py-3 min-w-[180px] border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${escapeHtml(stage)}`;
-                if (type === 'conn') {
-                    headerHTML += ` <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span>`;
-                }
+                if (type === 'conn') headerHTML += ` <span class="text-[10px] font-normal opacity-70 block">Connection ID (GUID)</span>`;
                 headerHTML += `</th>`;
             });
             headerHTML += `<th scope="col" class="px-4 py-3 w-10 border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}"></th></tr>`;
@@ -401,26 +389,22 @@
             tbody.innerHTML = data.map((row, index) => {
                 let rowHTML = `<tr class="group hover:bg-slate-50 dark:hover:bg-zinc-800/50 focus-within:bg-blue-50 dark:focus-within:bg-blue-900/10 transition-colors duration-150">`;
                 
-                // Column 1
                 rowHTML += `<td class="px-4 py-3 space-y-2 border-b border-slate-100 dark:border-zinc-800 align-top">                    
-                    <input type="text" id="input-${row.id}-key" aria-label="${keyLabel} for row ${index+1}" placeholder="${type === 'env' ? 'Schema Name' : 'Logical Name'}" value="${escapeHtml(row.key)}" oninput="updateKey('${type}', '${row.id}', this.value)" 
+                    <input type="text" id="input-${row.id}-key" aria-label="${keyLabel} for row ${index+1}" placeholder="${type === 'env' ? 'Schema Name' : 'Logical Name'}" value="${escapeHtml(row.key)}" 
+                        oninput="updateKey('${type}', '${row.id}', this.value)" 
                         class="w-full px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-medium">`;
                 
                 if(type === 'conn') {
-                    rowHTML += `<input type="text" list="connectorList" aria-label="Connector ID for row ${index+1}" placeholder="Connector ID (Type to search...)" value="${escapeHtml(row.connectorId || '')}" oninput="updateConnectorId('${row.id}', this.value)"
-                        class="w-full px-2 py-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-600 dark:text-zinc-400" title="Select common connector or type custom ID">`;
+                    rowHTML += `<input type="text" list="connectorList" aria-label="Connector ID for row ${index+1}" placeholder="Connector ID" value="${escapeHtml(row.connectorId || '')}" oninput="updateConnectorId('${row.id}', this.value)"
+                        class="w-full px-2 py-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-xs text-slate-600 dark:text-zinc-400">`;
                 }
                 rowHTML += `</td>`;
                 
-                // Stage Values
                 state.stages.forEach(stage => {
                     const safeStage = escapeHtml(stage);
                     const val = row.values[stage] || '';
-                    
                     let validClass = '';
-                    if (type === 'conn' && val.trim() !== '' && !isValidGuid(val.trim())) {
-                        validClass = 'invalid-guid';
-                    }
+                    if (type === 'conn' && val.trim() !== '' && !isValidGuid(val.trim())) validClass = 'invalid-guid';
 
                     if (type === 'env') {
                         rowHTML += `<td class="px-4 py-3 align-top border-b border-slate-100 dark:border-zinc-800">
@@ -443,35 +427,17 @@
             }).join('');
         }
 
-        function updateStageSelect() {
-            const select = document.getElementById('stageSelect');
-            const currentVal = select.value;
-            let options = state.stages.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-            if(state.stages.length > 0) options += `<option value="ALL">ALL (Combined)</option>`;
-            select.innerHTML = options;
-            if(state.stages.includes(currentVal) || currentVal === 'ALL') select.value = currentVal;
-            else if(state.stages.length > 0) select.value = state.stages[0];
-        }
-
         // --- ACTIONS ---
         function switchTab(tab) {
             const activeClass = ['border-primary', 'text-primary'];
             const inactiveClass = ['border-transparent', 'text-slate-500', 'dark:text-zinc-400'];
-            
-            // Set ARIA states
             document.getElementById('tab-env').setAttribute('aria-selected', tab === 'env');
             document.getElementById('tab-conn').setAttribute('aria-selected', tab === 'conn');
-
             ['env', 'conn'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const section = document.getElementById(`section-${t}`);
-                if(t === tab) {
-                    el.classList.remove(...inactiveClass); el.classList.add(...activeClass);
-                    section.classList.remove('hidden');
-                } else {
-                    el.classList.remove(...activeClass); el.classList.add(...inactiveClass);
-                    section.classList.add('hidden');
-                }
+                if(t === tab) { el.classList.remove(...inactiveClass); el.classList.add(...activeClass); section.classList.remove('hidden'); }
+                else { el.classList.remove(...activeClass); el.classList.add(...inactiveClass); section.classList.add('hidden'); }
             });
             renderTable(tab);
         }
@@ -501,7 +467,6 @@
             list.push(newRow);
             saveState(); 
             renderTable(type);
-            // Accessibility UX: Auto-focus the new input
             setTimeout(() => {
                 const input = document.getElementById(`input-${newRow.id}-key`);
                 if(input) input.focus();
@@ -509,8 +474,8 @@
         }
 
         function deleteRow(type, id) {
-            if(type === 'env') state.envVars = state.envVars.filter(r => r.id !== id);
-            else state.connRefs = state.connRefs.filter(r => r.id !== id);
+            if(type === 'env') state.envVars = state.envVars.filter(r => String(r.id) !== String(id));
+            else state.connRefs = state.connRefs.filter(r => String(r.id) !== String(id));
             saveState(); renderTable(type); generateJSON();
         }
 
@@ -519,7 +484,6 @@
             const currentDir = sortState[type];
             const nextDir = currentDir === 'asc' ? 'desc' : 'asc';
             sortState[type] = nextDir;
-
             list.sort((a, b) => {
                 const keyA = (a.key || '').toLowerCase();
                 const keyB = (b.key || '').toLowerCase();
@@ -527,11 +491,7 @@
                 if (keyA > keyB) return currentDir === 'asc' ? 1 : -1;
                 return 0;
             });
-
-            saveState();
-            renderTable(type);
-            generateJSON();
-            
+            saveState(); renderTable(type); generateJSON();
             const btnText = document.getElementById(`txt-sort-${type}`);
             if(btnText) btnText.textContent = nextDir === 'asc' ? '↓ A-Z' : '↑ Z-A';
             showToast(`Sorted ${currentDir === 'asc' ? 'A-Z' : 'Z-A'}`);
@@ -539,19 +499,19 @@
 
         function updateKey(type, id, val) {
             const list = type === 'env' ? state.envVars : state.connRefs;
-            const item = list.find(r => r.id === id);
+            const item = list.find(r => String(r.id) === String(id));
             if(item) { item.key = val; debouncedSaveAndGenerate(); }
         }
 
         function updateConnectorId(id, val) {
-            const item = state.connRefs.find(r => r.id === id);
+            const item = state.connRefs.find(r => String(r.id) === String(id));
             if(item) { item.connectorId = val; debouncedSaveAndGenerate(); }
         }
 
         function updateValue(type, id, stage, val) {
             const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
             const list = type === 'env' ? state.envVars : state.connRefs;
-            const item = list.find(r => r.id === id);
+            const item = list.find(r => String(r.id) === String(id));
             if(item) { item.values[realStage] = val; debouncedSaveAndGenerate(); }
         }
 
@@ -559,7 +519,16 @@
             renderStages(); renderTable('env'); renderTable('conn'); updateStageSelect(); generateJSON();
         }
 
-        // --- GENERATOR & DOWNLOADS ---
+        function updateStageSelect() {
+            const select = document.getElementById('stageSelect');
+            const currentVal = select.value;
+            let options = state.stages.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+            if(state.stages.length > 0) options += `<option value="ALL">ALL (Combined)</option>`;
+            select.innerHTML = options;
+            if(state.stages.includes(currentVal) || currentVal === 'ALL') select.value = currentVal;
+            else if(state.stages.length > 0) select.value = state.stages[0];
+        }
+
         function buildPayload(stage) {
             const output = { "EnvironmentVariables": [], "ConnectionReferences": [] };
             const realStage = state.stages.find(s => escapeHtml(s) === stage) || stage;
@@ -593,9 +562,7 @@
 
         function copyToClipboard() {
             const text = document.getElementById('jsonOutput').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Copied to clipboard!");
-            });
+            navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!"));
         }
 
         function downloadStringAsFile(filename, content) {
