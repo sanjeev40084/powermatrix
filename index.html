@@ -78,17 +78,6 @@
 
                 <div class="h-6 w-px bg-slate-300 dark:bg-zinc-700 mx-1" aria-hidden="true"></div>
 
-                <button onclick="triggerProjectImport()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200"
-                    title="Restore a saved workspace file ('powermatrix-project.json') to resume editing.">
-                    <span aria-hidden="true">📂</span> <span class="hidden sm:inline">Load Project</span>
-                </button>
-                <button onclick="exportProjectState()" class="flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200"
-                    title="Download a backup of your current workspace ('powermatrix-project.json').">
-                    <span aria-hidden="true">💾</span> <span class="hidden sm:inline">Save Project</span>
-                </button>
-                
-                <div class="h-6 w-px bg-slate-300 dark:bg-zinc-700 mx-1" aria-hidden="true"></div>
-
                 <button onclick="resetData()" class="group flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700" 
                     title="Clear all data and reset to default state.">
                     <span class="group-hover:rotate-180 transition-transform duration-500" aria-hidden="true">🗑️</span> <span class="hidden sm:inline">Reset</span>
@@ -100,7 +89,6 @@
             </div>
         </header>
 
-        <input type="file" id="projectUpload" class="hidden" accept=".json" onchange="handleProjectUpload(this)" aria-hidden="true">
         <input type="file" id="templateUpload" class="hidden" accept=".json" onchange="handleTemplateUpload(this)" aria-hidden="true">
 
         <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-700 p-6 transition-all duration-300">
@@ -163,9 +151,17 @@
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <select id="stageSelect" aria-label="Select stage to export" onchange="generateJSON()" class="flex-1 sm:w-48 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium"></select>
                     
-                    <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard" aria-label="Copy JSON to clipboard">📋</button>
-                    <button onclick="downloadSelected()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download Current JSON" aria-label="Download current JSON file">⬇️</button>
-                    <button onclick="downloadAll()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download ALL Stages (Batch)" aria-label="Download JSON files for all stages">📦</button>
+                    <button onclick="copyToClipboard()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Copy to Clipboard" aria-label="Copy JSON to clipboard">
+                        <span aria-hidden="true">📋</span>
+                    </button>
+                    
+                    <button onclick="downloadSelected()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download Current JSON" aria-label="Download current JSON file">
+                        <span aria-hidden="true">📥</span>
+                    </button>
+                    
+                    <button onclick="downloadAll()" class="p-2 border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 text-lg transition-colors duration-200" title="Download ALL Stages (Batch)" aria-label="Download JSON files for all stages">
+                        <span aria-hidden="true">🗃️</span>
+                    </button>
                 </div>
             </div>
             <pre id="jsonOutput" class="bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-slate-300 p-4 rounded-md border border-slate-200 dark:border-zinc-700 font-mono text-xs md:text-sm overflow-auto max-h-96 shadow-inner transition-all duration-300" tabindex="0" aria-label="JSON Output Preview">{}</pre>
@@ -184,6 +180,9 @@
     <div id="toast" role="alert" aria-live="polite" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded shadow-lg font-medium text-sm transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50">Copied to clipboard!</div>
 
     <script>
+        // Footer Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
         // --- DATA: Common Connectors ---
         const COMMON_CONNECTORS = [
             { name: "SharePoint", id: "/providers/Microsoft.PowerApps/apis/shared_sharepointonline" },
@@ -262,7 +261,6 @@
             if (saved) {
                 try { state = JSON.parse(saved); } catch(e) { console.error("Failed load", e); }
             }
-            // Ensure state integrity if loaded from old version or empty
             if (!state.envVars) state.envVars = JSON.parse(JSON.stringify(defaultState.envVars));
             if (!state.connRefs) state.connRefs = JSON.parse(JSON.stringify(defaultState.connRefs));
         }
@@ -273,40 +271,11 @@
 
         function resetData() {
             if(confirm("Reset all data? This cannot be undone.")) {
-                state = JSON.parse(JSON.stringify(defaultState)); // Deep Copy
+                state = JSON.parse(JSON.stringify(defaultState));
                 saveState();
                 refreshAll();
                 showToast("Data reset successfully");
             }
-        }
-
-        // --- FILE OPERATIONS ---
-        function exportProjectState() {
-            const timestamp = new Date().toISOString().slice(0, 10);
-            downloadStringAsFile(`powermatrix-project-${timestamp}.json`, JSON.stringify(state, null, 2));
-            showToast("Project saved!");
-        }
-
-        function triggerProjectImport() { document.getElementById('projectUpload').click(); }
-        function handleProjectUpload(input) {
-            const file = input.files[0];
-            if (!file) return;
-            if (file.size > 2 * 1024 * 1024) { alert("File too large"); return; }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (imported.EnvironmentVariables || imported.ConnectionReferences) {
-                        alert("Use 'Import Template' for deployment-settings.json files."); return;
-                    }
-                    if (Array.isArray(imported.stages) && Array.isArray(imported.envVars)) {
-                        state = imported;
-                        saveState(); refreshAll(); showToast("Project loaded!");
-                    } else { alert("Invalid project file."); }
-                } catch (err) { alert("Error: " + err.message); }
-                input.value = '';
-            };
-            reader.readAsText(file);
         }
 
         function triggerTemplateImport() { document.getElementById('templateUpload').click(); }
@@ -616,9 +585,6 @@
         }
 
         init();
-
-        // Set current year in footer
-        document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 </body>
 </html>
