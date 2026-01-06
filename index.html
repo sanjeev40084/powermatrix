@@ -349,7 +349,8 @@
             const thead = document.querySelector(`#${tableId} thead`);
             
             const headerBgClass = document.documentElement.classList.contains('dark') ? 'bg-zinc-900' : 'bg-slate-50';
-            const firstColClass = type === 'conn' ? 'min-w-[450px]' : 'min-w-[350px]';
+            // UPDATED: Increased width from 450px to 600px for Connection References
+            const firstColClass = type === 'conn' ? 'min-w-[600px]' : 'min-w-[350px]';
 
             // Header
             let headerHTML = `<tr><th scope="col" class="px-4 py-3 ${firstColClass} border-b border-slate-200 dark:border-zinc-700 ${headerBgClass}">${keyLabel}</th>`;
